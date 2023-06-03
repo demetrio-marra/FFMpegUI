@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33723.286
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FFMpegUI.Mvc", "FFMpegUI.Mvc\FFMpegUI.Mvc.csproj", "{A2B81B29-4499-417A-81C4-7E2560F7FD96}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FFMpegUI", "FFMpegUI\FFMpegUI.csproj", "{F1CE24A7-57B9-43CF-AF67-C728BBF335D6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FFMpegUI.Persistence", "FFMpegUI.Persistence\FFMpegUI.Persistence.csproj", "{8280FD03-FAE1-4B03-9DB0-ABB966B9888B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FFMpegUI.Infrastructure", "FFMpegUI.Infrastructure\FFMpegUI.Infrastructure.csproj", "{C69488F3-F442-4A17-9A3C-72EE6AB6F3FA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FFMpegUI.Persistence.Definitions", "FFMpegUI.Persistence.Definitions\FFMpegUI.Persistence.Definitions.csproj", "{878AFD11-D38E-4B0B-9DF6-64558651D662}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FFMpegUI.Services", "FFMpegUI.Services\FFMpegUI.Services.csproj", "{F36BFF01-9806-4A32-A5E2-E1B8E2DB545B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A2B81B29-4499-417A-81C4-7E2560F7FD96}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2B81B29-4499-417A-81C4-7E2560F7FD96}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2B81B29-4499-417A-81C4-7E2560F7FD96}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2B81B29-4499-417A-81C4-7E2560F7FD96}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1CE24A7-57B9-43CF-AF67-C728BBF335D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1CE24A7-57B9-43CF-AF67-C728BBF335D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1CE24A7-57B9-43CF-AF67-C728BBF335D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1CE24A7-57B9-43CF-AF67-C728BBF335D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8280FD03-FAE1-4B03-9DB0-ABB966B9888B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8280FD03-FAE1-4B03-9DB0-ABB966B9888B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8280FD03-FAE1-4B03-9DB0-ABB966B9888B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8280FD03-FAE1-4B03-9DB0-ABB966B9888B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C69488F3-F442-4A17-9A3C-72EE6AB6F3FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C69488F3-F442-4A17-9A3C-72EE6AB6F3FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C69488F3-F442-4A17-9A3C-72EE6AB6F3FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C69488F3-F442-4A17-9A3C-72EE6AB6F3FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{878AFD11-D38E-4B0B-9DF6-64558651D662}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{878AFD11-D38E-4B0B-9DF6-64558651D662}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{878AFD11-D38E-4B0B-9DF6-64558651D662}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{878AFD11-D38E-4B0B-9DF6-64558651D662}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F36BFF01-9806-4A32-A5E2-E1B8E2DB545B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F36BFF01-9806-4A32-A5E2-E1B8E2DB545B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F36BFF01-9806-4A32-A5E2-E1B8E2DB545B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F36BFF01-9806-4A32-A5E2-E1B8E2DB545B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C857394B-AF04-479E-B569-45965E0FABDF}
+	EndGlobalSection
+EndGlobal

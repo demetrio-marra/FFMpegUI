@@ -1,0 +1,46 @@
+﻿@page
+@model ProcessiModel
+@using PagedList.Core;
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    ViewData["Title"] = "Processi";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th scope="col">Process ID</th>
+            <th scope="col">Created</th>
+            <th scope="col">Start Date</th>
+            <th scope="col">End Date</th>
+            <th scope="col">Files Count</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Processes)
+        {
+            <tr>
+                <td>@(item.ProcessId.HasValue ? item.ProcessId.Value.ToString() : "N/A")</td>
+                <td>@item.SubmissionDate.ToString("g")</td>
+                <td>@(item.StartDate.HasValue ? item.StartDate.Value.ToString("g") : "N/A")</td>
+                <td>@(item.EndDate.HasValue ? item.EndDate.Value.ToString("g") : "N/A")</td>
+                <td>@item.FilesCount</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<nav aria-label="Page navigation example">
+    <ul class="pagination">
+        @for (var i = 1; i <= Model.Processes.PageCount; i++)
+        {
+            <li class="page-item @(i == Model.Processes.PageNumber ? "active" : "")">
+                <a class="page-link" asp-page="./Processi" asp-route-PageNumber="@i">@i</a>
+            </li>
+        }
+    </ul>
+</nav>
+

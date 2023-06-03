@@ -1,0 +1,66 @@
+﻿@page
+@model NuovoProcesso
+
+@{
+    ViewData["Title"] = "Nuovo Processo";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<form method="post" enctype="multipart/form-data">
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label asp-for="OverallConversionQuality" class="form-label">Overall Conversion Quality</label>
+            <input asp-for="OverallConversionQuality" max="51" min="0" class="form-control" required />
+        </div>
+        <div class="col-md-6">
+            <label asp-for="RescaleHorizontalWidth" class="form-label">Rescale Horizontal Width</label>
+            <input asp-for="RescaleHorizontalWidth" class="form-control" required />
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label asp-for="AudioCodec" class="form-label">Audio Codec</label>
+            <select asp-for="AudioCodec" asp-items="Model.AudioCodecList" class="form-select" required></select>
+        </div>
+        <div class="col-md-6">
+            <label asp-for="VideoCodec" class="form-label">Video Codec</label>
+            <select asp-for="VideoCodec" asp-items="Model.VideoCodecList" class="form-select" required></select>
+        </div>
+    </div>
+
+    <div id="dynamicInput">
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <label class="form-label">Seleziona file</label>
+                <input type="file" name="files" class="form-control" required />
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 text-end mb-4">
+
+            <button type="button" class="btn btn-secondary me-2" id="addInput">Aggiungi un altro file</button>
+            <button type="submit" class="btn btn-primary">Crea processo</button>
+
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        $(function () {
+            $("#addInput").click(function () {
+                var newInput = `<div class="row mb-3 ff-fileupload-row"><div class="col-md-10"><div class="form-group"><input type="file" name="files" class="form-control" required /></div></div><div class="col-md-2 text-end"><button type="button" class="btn btn-danger removeInput">Rimuovi file</button></div></div>`;
+                $("#dynamicInput").append(newInput);
+            });
+
+            $(document).on('click', '.removeInput', function () {
+                $(this).closest('.ff-fileupload-row').remove();
+            });
+        });
+    </script>
+}

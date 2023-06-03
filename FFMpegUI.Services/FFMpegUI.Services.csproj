@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FFMpegUI.Infrastructure\FFMpegUI.Infrastructure.csproj" />
+    <ProjectReference Include="..\FFMpegUI.Persistence.Definitions\FFMpegUI.Persistence.Definitions.csproj" />
+    <ProjectReference Include="..\FFMpegUI.Persistence\FFMpegUI.Persistence.csproj" />
+    <ProjectReference Include="..\FFMpegUI\FFMpegUI.csproj" />
+  </ItemGroup>
+
+</Project>
