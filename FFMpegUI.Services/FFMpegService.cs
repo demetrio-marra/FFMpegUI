@@ -84,6 +84,19 @@ namespace FFMpegUI.Services
             }
         }
 
+        async Task<FFMpegFileDownloadDTO> IFFMpegManagementService.GetFileForDownload(long fileId)
+        {
+            var x = await qFileServerApiService.DownloadFile(fileId);
+            var ret = new FFMpegFileDownloadDTO
+            {
+                ContentType = x.ContentType,
+                FileName = x.FileName,
+                FileStream = x.FileStream
+            };
+
+            return ret;
+        }
+
         private async Task<FFMpegProcess> GetProcessAndItems(int processId)
         {
             var eProcess = await processRepository.GetWithItemsAsync(processId);

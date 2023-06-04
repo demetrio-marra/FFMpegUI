@@ -13,9 +13,11 @@ services:
     #command: ["./dockerize", "-wait", "tcp://qfileserverdb:1433", "-timeout", "60s"]
     environment:
       - ConnectionStrings__DefaultConnectionString=Server=qfileserverdb;Initial Catalog=QFileServer;Persist Security Info=False;User ID=sa;Password=yourStrong!Passw0rd;
-      - QFileServiceConfiguration__FileServerRootPath=C:\Users\dmarra\Desktop\QFileServerData
+      - QFileServiceConfiguration__FileServerRootPath=/app/nasroot
     depends_on:
       - qfileserverdb
+    volumes:
+      - C:\Users\dmarra\Desktop\QFileServerData:/app/nasroot
  
   ffmpeguisql:
     image: "mcr.microsoft.com/mssql/server"

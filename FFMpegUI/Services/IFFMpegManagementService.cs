@@ -10,5 +10,7 @@ namespace FFMpegUI.Services
         Task CreateProcess(FFMpegCreateProcessCommand command);
 
         Task<FFMpegProcess> GetProcessDetails(int processId);
+
+        Task<FFMpegFileDownloadDTO> GetFileForDownload(long fileId);
     }
 }

@@ -46,7 +46,7 @@
             }
             
             <tr>
-                <td>@item.SourceFileName</td>
+                <td><a asp-page-handler="Download" asp-route-id="@item.SourceFileId">@item.SourceFileName</a></td>
                 <td>@item.ConvertedFileName</td>
                 <td>@(item.StartDate.HasValue ? item.StartDate.Value.ToString("g") : "N/A")</td>
                 <td>@(item.EndDate.HasValue ? item.EndDate.Value.ToString("g") : "N/A")</td>

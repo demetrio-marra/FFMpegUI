@@ -1,5 +1,6 @@
 using FFMpegUI.Models;
 using FFMpegUI.Services;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace FFMpegUI.Mvc.Pages
@@ -42,6 +43,12 @@ namespace FFMpegUI.Mvc.Pages
             RescaleHorizontalWidth = process.RescaleHorizontalWidth;
 
             ViewData["Title"] = $"Dettaglio processo {id}";
+        }
+
+        public async Task<IActionResult> OnGetDownload(long id)
+        {
+            var file = await service.GetFileForDownload(id);
+            return File(file.FileStream, file.ContentType, file.FileName);
         }
     }
 }
