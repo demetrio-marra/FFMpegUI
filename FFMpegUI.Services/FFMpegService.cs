@@ -3,6 +3,7 @@ using FFMpegUI.Models;
 using FFMpegUI.Persistence.Entities;
 using FFMpegUI.Persistence.Repositories;
 using FFMpegUI.Services.Configuration;
+using FFMpegUI.Services.Middlewares;
 using PagedList.Core;
 
 namespace FFMpegUI.Services
@@ -13,18 +14,21 @@ namespace FFMpegUI.Services
         private readonly IFFMpegProcessFeaturesRepository processFeaturesRepository;
         private readonly IFFMpegProcessRepository processRepository;
         private readonly IFFMpegProcessItemsRepository processItemsRepository;
+        private readonly IQFileServerApiService qFileServerApiService;
         private readonly FFMpegUIServiceConfiguration configuration;
 
         public FFMpegService(IMapper mapper,
             IFFMpegProcessFeaturesRepository processFeaturesRepository,
             IFFMpegProcessRepository processRepository,
             IFFMpegProcessItemsRepository processItemsRepository,
+            IQFileServerApiService qFileServerApiService,
             FFMpegUIServiceConfiguration configuration)
         {
             this.mapper = mapper;
             this.processFeaturesRepository = processFeaturesRepository;
             this.processRepository = processRepository;
             this.processItemsRepository = processItemsRepository;
+            this.qFileServerApiService = qFileServerApiService;
             this.configuration = configuration;
         }
 
@@ -32,32 +36,24 @@ namespace FFMpegUI.Services
         {
             var submissionDate = DateTime.Now;
 
-            var filesModel = new List<FFMpegProcessItem>();
-
-            // save each file to the designated source directory
-            var newProcessFolderGuid = Guid.NewGuid().ToString();
-            var sourceFilesBasePath = Path.Combine(configuration.SourceFilesDirectoryPath, newProcessFolderGuid);
-            Directory.CreateDirectory(sourceFilesBasePath);
+            var processItemsList = new List<FFMpegProcessItem>();
 
             foreach(var f in command.Files)
             {
-                var assignedFileName = Guid.NewGuid().ToString();
-                var assignedFileFullPath = Path.Combine(sourceFilesBasePath, assignedFileName);
-                using (var writeStream = new FileStream(assignedFileFullPath, FileMode.Create, FileAccess.Write)) 
-                {  
-                    await f.UpcomingStream.CopyToAsync(writeStream);
-                }
-
-                filesModel.Add(new FFMpegProcessItem
+                // upload each file to QFileServer and get its registered id
+                var uploadedFile = await qFileServerApiService.UploadFile(f.UpcomingStream, f.UpcomingFileName);
+                
+                processItemsList.Add(new FFMpegProcessItem
                 {
-                     SourceFileFullPath = assignedFileFullPath                     
+                    SourceFileName = f.UpcomingFileName,
+                    SourceFileId = uploadedFile.Id
                 });
             }
 
             var newProcess = new FFMpegProcess
             {
                 SubmissionDate = submissionDate,
-                 Items = filesModel,
+                 Items = processItemsList,
                   
             };
 
@@ -88,12 +84,17 @@ namespace FFMpegUI.Services
             }
         }
 
-
         private async Task<FFMpegProcess> GetProcessAndItems(int processId)
         {
             var eProcess = await processRepository.GetWithItemsAsync(processId);
             var eProcessFeatures = await processFeaturesRepository.GetAsync(processId);
             var ret = mapper.Map<FFMpegProcess>((eProcess, eProcessFeatures));
+            return ret;
+        }
+
+        async Task<FFMpegProcess> IFFMpegManagementService.GetProcessDetails(int processId)
+        {
+            var ret = await GetProcessAndItems(processId);
             return ret;
         }
 

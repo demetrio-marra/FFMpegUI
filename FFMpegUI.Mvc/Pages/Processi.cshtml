@@ -12,6 +12,7 @@
 <table class="table table-striped table-hover">
     <thead>
         <tr>
+            <th scope="col"></th>
             <th scope="col">Process ID</th>
             <th scope="col">Created</th>
             <th scope="col">Start Date</th>
@@ -23,6 +24,7 @@
         @foreach (var item in Model.Processes)
         {
             <tr>
+                <td><a asp-page="/DettaglioProcesso" asp-route-id="@item.ProcessId">Dettagli</a></td>
                 <td>@(item.ProcessId.HasValue ? item.ProcessId.Value.ToString() : "N/A")</td>
                 <td>@item.SubmissionDate.ToString("g")</td>
                 <td>@(item.StartDate.HasValue ? item.StartDate.Value.ToString("g") : "N/A")</td>

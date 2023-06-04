@@ -2,7 +2,6 @@
 {
     public class FFMpegUIServiceConfiguration
     {
-        public string SourceFilesDirectoryPath { get; set; }
-        public string ConvertedFilesDirectoryPath { get; set; }
+        public string DummyText { get; set; }
     }
 }

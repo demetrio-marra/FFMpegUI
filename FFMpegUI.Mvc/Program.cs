@@ -1,14 +1,11 @@
-using FFMpegUI.Models;
 using FFMpegUI.Persistence;
-using FFMpegUI.Persistence.Entities;
 using FFMpegUI.Persistence.Mapping;
 using FFMpegUI.Persistence.Repositories;
 using FFMpegUI.Services;
 using FFMpegUI.Services.Configuration;
-using Microsoft.AspNetCore.Hosting;
+using FFMpegUI.Services.Middlewares;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
-using Raven.DependencyInjection;
 
 namespace FFMpegUI.Mvc
 {
@@ -22,42 +19,53 @@ namespace FFMpegUI.Mvc
             builder.Services.AddRazorPages();
 
             // Configure the HTTP request pipeline.
-            if (!builder.Environment.IsDevelopment())
-            {
-                builder.Services.AddDbContext<FFMpegDbContext>(options =>
-                    options.UseSqlServer(builder.Configuration.GetConnectionString("FFMpegUI")));
-            }
-            else
-            {
-                builder.Services.AddDbContext<FFMpegDbContext>(options =>
-                    options.UseInMemoryDatabase("FFMpegUI")
-                    .ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning))
-                );
-            }
 
-           
-
-            // RavenDB Configuration
-            builder.Services.AddRavenDbDocStore(options =>
+            // Set the certificate validation callback
+            builder.Services.AddDbContext<FFMpegDbContext>(options =>
             {
-                options.Settings = new RavenSettings
+                var connectionString = builder.Configuration.GetConnectionString("SqlDb");
+
+                var sqlConnectionStringBuilder = new SqlConnectionStringBuilder(connectionString)
                 {
-                    Urls = builder.Configuration.GetValue<string[]>("RavenDb:Urls") ,
-                    DatabaseName = builder.Configuration.GetValue<string>("RavenDb:Database")
-                    // Configure any additional settings here...
+                    TrustServerCertificate = true // Ignore SSL certificate validation
+                    //SslMode = SslMode.VerifyCA
                 };
-                options.SectionName = "RavenDb";
-                options.GetConfiguration = builder.Configuration;
 
-                // If using a certificate
-                // options.Certificate = new X509Certificate2("path-to-certificate", "optional-password");
-
-                // BeforeInitializeDocStore and AfterInitializeDocStore can be used to execute code before and after the document store is initialized, respectively.
-                // For example, to set conventions or register indexes.
+                options.UseSqlServer(sqlConnectionStringBuilder.ConnectionString, b => b.MigrationsAssembly("FFMpegUI.Mvc"));
             });
 
+            builder.Services.AddHttpClient("QFileServerApiServiceClient", client =>
+            {
+                var url = builder.Configuration.GetValue<string>("QFileServerApiUrl");
+                if (url == null)
+                {
+                    throw new Exception("QFileServerApiUrl is null");
+                }
+                client.BaseAddress = new Uri(url);
+            });
+
+
+            //// RavenDB Configuration
+            //builder.Services.AddRavenDbDocStore(options =>
+            //{
+            //    options.Settings = new RavenSettings
+            //    {
+            //        Urls = builder.Configuration.GetValue<string[]>("RavenDb:Urls") ,
+            //        DatabaseName = builder.Configuration.GetValue<string>("RavenDb:Database")
+            //        // Configure any additional settings here...
+            //    };
+            //    options.SectionName = "RavenDb";
+            //    options.GetConfiguration = builder.Configuration;
+
+            //    // If using a certificate
+            //    // options.Certificate = new X509Certificate2("path-to-certificate", "optional-password");
+
+            //    // BeforeInitializeDocStore and AfterInitializeDocStore can be used to execute code before and after the document store is initialized, respectively.
+            //    // For example, to set conventions or register indexes.
+            //});
+
             builder.Services.AddAutoMapper(
-                typeof(Program).Assembly, 
+                typeof(Program).Assembly,
                 typeof(FFMpegPersistenceMapperProfile).Assembly
             );
 
@@ -70,47 +78,13 @@ namespace FFMpegUI.Mvc
 
             // Register the FFMpegUIServiceConfiguration instance as a singleton
             builder.Services.AddSingleton(ffmpegUIConfig);
+
+            builder.Services.AddScoped<IQFileServerApiService, QFileServerApiService>();
+
             builder.Services.AddScoped<IFFMpegConvertingService, FFMpegService>();
             builder.Services.AddScoped<IFFMpegManagementService, FFMpegService>();
 
             var app = builder.Build();
-
-
-            // Add dummy data
-            using (var scope = app.Services.CreateScope())
-            {
-                var services = scope.ServiceProvider;
-                var dbContext = services.GetRequiredService<FFMpegDbContext>();
-
-                // Ensure the database is created
-                dbContext.Database.EnsureCreated();
-
-                // Check if any data already exist
-                if (!dbContext.Processes.Any())
-                {
-                    // Creating dummy data
-                    var dummyData = Enumerable.Range(1, 50).Select(index => new FFMpegPersistedProcess
-                    {
-                        Id = index,
-                        SubmissionDate = DateTime.Now,
-                        StartDate = DateTime.Now.AddHours(-index),
-                        EndDate = DateTime.Now.AddHours(index),
-                         Items = Enumerable.Range(1, 3).Select(index2 => new FFMpegPersistedProcessItem
-                         {
-                              Id = (index - 1) * 50 + index2,
-                               DestFileFullPath = "/var/ffmpegdata/converted",
-                                SourceFileFullPath = "/var/ffmpegdata/sourcefiles",
-                                 StartDate = DateTime.Now,
-                                  ProcessId = index,
-                                   Successfull = true,
-                                   EndDate = DateTime.Now.AddHours(3)
-                         }).ToList()
-                    }).ToList();
-
-                    dbContext.Processes.AddRange(dummyData);
-                    dbContext.SaveChanges();
-                }
-            }
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
@@ -130,16 +104,18 @@ namespace FFMpegUI.Mvc
 
             app.MapRazorPages();
 
-
-            if (!app.Environment.IsDevelopment())
+            // Get an instance of IServiceProvider from the host
+            using (var scope = app.Services.CreateScope())
             {
-                // Auto migrate database
-                using (var serviceScope = app.Services.CreateScope())
-                {
-                    var context = serviceScope.ServiceProvider.GetService<FFMpegDbContext>();
-                    context!.Database.Migrate();
-                }
+                var services = scope.ServiceProvider;
+
+                // Resolve YourDbContext within the scope
+                var dbContext = services.GetRequiredService<FFMpegDbContext>();
+
+                // Apply migrations
+                dbContext.Database.Migrate();
             }
+
             app.Run();
         }
     }

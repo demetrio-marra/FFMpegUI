@@ -48,28 +48,28 @@ namespace FFMpegUI.Mvc.Pages
 
         public async Task<IActionResult> OnPostAsync(IFormFileCollection files)
         {
-            foreach (var formFile in files)
+            if (files.Any())
             {
-                if (formFile.Length > 0)
+                var command = new FFMpegCreateProcessCommand();
+                var fileList = files.Select(f => new FFMpegCreateProcessCommand.FFMpegCreateProcessCommandItem
                 {
-                    var command = new FFMpegCreateProcessCommand();
-                    var fileList = files.Select(f => new FFMpegCreateProcessCommand.FFMpegCreateProcessCommandItem
-                    {
-                        UpcomingFileName = f.FileName,
-                        UpcomingStream = f.OpenReadStream()
-                    }).ToList();
+                    UpcomingFileName = f.FileName,
+                    UpcomingStream = f.OpenReadStream()
+                }).ToList();
 
-                    command.Files = fileList;
+                command.Files = fileList;
 
-                    // Set the properties on the command
-                    command.OverallConversionQuality = OverallConversionQuality;
-                    command.AudioCodec = AudioCodec;
-                    command.VideoCodec = VideoCodec;
-                    command.RescaleHorizontalWidth = RescaleHorizontalWidth;
+                // Set the properties on the command
+                command.OverallConversionQuality = OverallConversionQuality;
+                command.AudioCodec = AudioCodec;
+                command.VideoCodec = VideoCodec;
+                command.RescaleHorizontalWidth = RescaleHorizontalWidth;
 
-                    await service.CreateProcess(command);
-                }
+                await service.CreateProcess(command);
+
+                return RedirectToPage("/Processi");
             }
+
             return Page();
         }
     }

@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\FFMpegUI.Infrastructure\FFMpegUI.Infrastructure.csproj" />
     <ProjectReference Include="..\FFMpegUI.Persistence.Definitions\FFMpegUI.Persistence.Definitions.csproj" />
     <ProjectReference Include="..\FFMpegUI.Persistence\FFMpegUI.Persistence.csproj" />

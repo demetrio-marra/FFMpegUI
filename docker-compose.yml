@@ -1,0 +1,39 @@
+version: '3.4'
+
+services:
+  
+  qfileserverdb:
+    image: "mcr.microsoft.com/mssql/server"
+    environment:
+      - SA_PASSWORD=yourStrong!Passw0rd
+      - ACCEPT_EULA=Y
+
+  qfileserver:
+    image: "demetriomarra3/qfileserver"
+    #command: ["./dockerize", "-wait", "tcp://qfileserverdb:1433", "-timeout", "60s"]
+    environment:
+      - ConnectionStrings__DefaultConnectionString=Server=qfileserverdb;Initial Catalog=QFileServer;Persist Security Info=False;User ID=sa;Password=yourStrong!Passw0rd;
+      - QFileServiceConfiguration__FileServerRootPath=C:\Users\dmarra\Desktop\QFileServerData
+    depends_on:
+      - qfileserverdb
+ 
+  ffmpeguisql:
+    image: "mcr.microsoft.com/mssql/server"
+    environment:
+      - SA_PASSWORD=yourStrong!Passw0rd
+      - ACCEPT_EULA=Y
+ 
+  ffmpegui.mvc:
+    image: ${DOCKER_REGISTRY-}ffmpeguimvc
+    #container_name: ffmpegui.mvc
+    #command: ["./dockerize", "-wait", "tcp://ffmpeguisql:1433", "-timeout", "60s"]
+    build:
+      context: .
+      dockerfile: FFMpegUI.Mvc/Dockerfile
+    ports:
+      - 57080:80
+    environment:
+      - ConnectionStrings__SqlDb=Server=ffmpeguisql;Database=FFMpegUI;User Id=sa;Password=yourStrong!Passw0rd;
+      - QFileServerApiUrl=http://qfileserver
+    depends_on:
+      - ffmpeguisql
