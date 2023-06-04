@@ -32,6 +32,11 @@ namespace FFMpegUI.Services
             this.configuration = configuration;
         }
 
+        void IFFMpegConvertingService.BeginConvert(int processId)
+        {
+            throw new NotImplementedException();
+        }
+
         async Task IFFMpegManagementService.CreateProcess(FFMpegCreateProcessCommand command)
         {
             var submissionDate = DateTime.Now;

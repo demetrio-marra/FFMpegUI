@@ -2,5 +2,6 @@
 {
     public interface IFFMpegConvertingService
     {
+        void BeginConvert(int processId);
     }
 }
