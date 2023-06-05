@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using FFMpegUI.Infrastructure.Support;
 using FFMpegUI.Models;
 using FFMpegUI.Persistence.Entities;
 using FFMpegUI.Persistence.Repositories;
@@ -8,7 +9,7 @@ using PagedList.Core;
 
 namespace FFMpegUI.Services
 {
-    public class FFMpegService : IFFMpegManagementService, IFFMpegConvertingService
+    public class FFMpegManagementService : IFFMpegManagementService
     {
         private readonly IMapper mapper;
         private readonly IFFMpegProcessFeaturesRepository processFeaturesRepository;
@@ -16,12 +17,16 @@ namespace FFMpegUI.Services
         private readonly IFFMpegProcessItemsRepository processItemsRepository;
         private readonly IQFileServerApiService qFileServerApiService;
         private readonly FFMpegUIServiceConfiguration configuration;
+        private readonly IFFMpegUIApiService apiService;
+        private readonly BackgroundTaskQueue taskQueue;
 
-        public FFMpegService(IMapper mapper,
+        public FFMpegManagementService(IMapper mapper,
             IFFMpegProcessFeaturesRepository processFeaturesRepository,
             IFFMpegProcessRepository processRepository,
             IFFMpegProcessItemsRepository processItemsRepository,
             IQFileServerApiService qFileServerApiService,
+            IFFMpegUIApiService apiService,
+            BackgroundTaskQueue taskQueue,
             FFMpegUIServiceConfiguration configuration)
         {
             this.mapper = mapper;
@@ -29,12 +34,9 @@ namespace FFMpegUI.Services
             this.processRepository = processRepository;
             this.processItemsRepository = processItemsRepository;
             this.qFileServerApiService = qFileServerApiService;
+            this.apiService = apiService;
+            this.taskQueue = taskQueue;
             this.configuration = configuration;
-        }
-
-        void IFFMpegConvertingService.BeginConvert(int processId)
-        {
-            throw new NotImplementedException();
         }
 
         async Task<FFMpegProcess> IFFMpegManagementService.CreateProcess(FFMpegCreateProcessCommand command)
@@ -83,6 +85,14 @@ namespace FFMpegUI.Services
                 var persistedProcessItems = await processItemsRepository.CreateAsync(eProcessItems);
 
                 await processFeaturesRepository.CreateAsync(eProcessFeatures);
+
+                await Task.Run(async () => {
+                    await Task.Delay(1500);
+                    taskQueue.Enqueue(persistedProcessId);
+                });
+
+                eProcess.StartDate = DateTime.Now;
+                await processRepository.UpdateAsync(eProcess);
 
                 await processRepository.ConfirmTransactionAsync(transactionId);
 

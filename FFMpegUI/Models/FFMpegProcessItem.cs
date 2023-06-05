@@ -2,6 +2,7 @@
 {
     public class FFMpegProcessItem
     {
+        public int Id { get; set; }
         public int? ProcessId { get; set; }
         public long? SourceFileId { get; set; }
         public string? SourceFileName { get; set; }

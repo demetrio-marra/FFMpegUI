@@ -1,7 +1,9 @@
-﻿namespace FFMpegUI.Services
+﻿using FFMpegUI.Models;
+
+namespace FFMpegUI.Services
 {
     public interface IFFMpegConvertingService
     {
-        void BeginConvert(int processId);
+        Task<FFMpegConvertedFileDTO> Convert(long qFileServerFileId, FFMpegConvertParameters parameters);
     }
 }

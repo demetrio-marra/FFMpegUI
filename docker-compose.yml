@@ -31,14 +31,20 @@ services:
   
   ffmpeguinosql:
     image: ravendb/ravendb:latest
-    ports:
-      - 8080:8080
     environment:
       - RAVEN_Setup_Mode=None
       - RAVEN_License_Eula_Accepted=true
       - RAVEN_Security_UnsecuredAccessAllowed=PublicNetwork
     volumes:
       - C:\\Users\\dmarra\\Desktop\\FFMpegUIDemo\\RavenDbData:/data 
+
+  ffmpegui.api:
+    image: ${DOCKER_REGISTRY-}ffmpeguiapi
+    build:
+      context: .
+      dockerfile: FFMpegUI.Api/Dockerfile
+    environment:
+      - QFileServerApiUrl=http://qfileserver
 
   ffmpegui.mvc:
     image: ${DOCKER_REGISTRY-}ffmpeguimvc
@@ -54,7 +60,8 @@ services:
       - QFileServerApiUrl=http://qfileserver
       - RavenDb__Urls=http://ffmpeguinosql:8080
       - RavenDb__Database=FFMpegUI
+      - FFMpegUI__ApiEndpoint=http://ffmpegui.api/
     depends_on:
       - ffmpeguisql
       - ffmpeguinosql
-
+      - ffmpegui.api

@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>920b9ad6-23f2-4281-bc20-c97f310c8e01</UserSecretsId>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.18.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FFMpegUI.Infrastructure\FFMpegUI.Infrastructure.csproj" />
+    <ProjectReference Include="..\FFMpegUI.Services\FFMpegUI.Services.csproj" />
+    <ProjectReference Include="..\FFMpegUI\FFMpegUI.csproj" />
+  </ItemGroup>
+
+</Project>

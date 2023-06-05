@@ -6,11 +6,6 @@ EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 
-# Install FFmpeg
-RUN apt-get update \
-    && apt-get install -y ffmpeg \
-    && rm -rf /var/lib/apt/lists/*
-
 # Install Dockerize
 ENV DOCKERIZE_VERSION v0.6.1
 RUN apt-get update \

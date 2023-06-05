@@ -38,16 +38,16 @@
     </thead>
     <tbody>
         @foreach (var item in Model.ProcessItems)
-        {            
+        {
             var message = "ok";
             if (!(item.Successfull ?? false))
             {
                 message = item.ErrorMessage;
             }
-            
+
             <tr>
                 <td><a asp-page-handler="Download" asp-route-id="@item.SourceFileId">@item.SourceFileName</a></td>
-                <td>@item.ConvertedFileName</td>
+                <td><a asp-page-handler="Download" asp-route-id="@item.ConvertedFileId">@item.ConvertedFileName</a></td>
                 <td>@(item.StartDate.HasValue ? item.StartDate.Value.ToString("g") : "N/A")</td>
                 <td>@(item.EndDate.HasValue ? item.EndDate.Value.ToString("g") : "N/A")</td>
                 <td>@message</td>

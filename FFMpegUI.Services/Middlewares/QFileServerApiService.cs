@@ -72,6 +72,24 @@ namespace FFMpegUI.Services.Middlewares
             };
         }
 
+        public async Task<string> DownloadFile(long id, string downloadDirectoryFullPath)
+        {
+            var uriString = $"{API_PATH}/download/{id}";
+            var response = await httpClient.GetAsync(new Uri(uriString, UriKind.Relative));
+
+            response.EnsureSuccessStatusCode();
+
+            var fileName = response.Content.Headers?.ContentDisposition?.FileNameStar;
+            var fullFilePath = Path.Combine(downloadDirectoryFullPath, fileName!);
+
+            using (var fStream = new FileStream(fullFilePath, FileMode.Create, FileAccess.Write))
+            {
+                await response.Content.CopyToAsync(fStream);
+            }
+
+            return fullFilePath;
+        }
+
         private async Task<QFileServerDTO?> UploadFilePv(Stream rs, string fileName)
         {
             var mpContent = new MultipartFormDataContent

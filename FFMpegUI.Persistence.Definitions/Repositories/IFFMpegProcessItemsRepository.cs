@@ -9,7 +9,9 @@ namespace FFMpegUI.Persistence.Repositories
         Task<FFMpegPersistedProcessItem> CreateAsync(FFMpegPersistedProcessItem createdProcessItem);
         Task<FFMpegPersistedProcessItem> GetAsync(int processItemId);
         Task<IPagedList<FFMpegPersistedProcessItem>> GetAllAsync(int pageNumber, int pageSize);
-        Task<FFMpegPersistedProcessItem> UpdateAsync(FFMpegPersistedProcessItem updatedProcessItem);
+        Task UpdateStartInfo(int processItemId, DateTime startDate);
+        Task UpdateEndInfo(int processItemId, DateTime? endDate, long? convertedFileId, string? convertedFileName, bool? success, string? errorMessage);
+
         Task DeleteAsync(int processItemId);
         Task<IEnumerable<FFMpegPersistedProcessItem>> CreateAsync(IEnumerable<FFMpegPersistedProcessItem> createdProcessItems);
     }

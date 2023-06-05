@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Raven.Client.Documents.Indexes;
 using Raven.Client.Documents;
 using Microsoft.Extensions.Configuration;
+using FFMpegUI.Infrastructure.Support;
 
 namespace FFMpegUI.Mvc
 {
@@ -43,6 +44,16 @@ namespace FFMpegUI.Mvc
                 if (url == null)
                 {
                     throw new Exception("QFileServerApiUrl is null");
+                }
+                client.BaseAddress = new Uri(url);
+            });
+
+            builder.Services.AddHttpClient("FFMpegApiServiceClient", client =>
+            {
+                var url = builder.Configuration.GetValue<string>("FFMpegUI:ApiEndpoint");
+                if (url == null)
+                {
+                    throw new Exception("ApiEndpoint is null");
                 }
                 client.BaseAddress = new Uri(url);
             });
@@ -89,9 +100,12 @@ namespace FFMpegUI.Mvc
             builder.Services.AddSingleton(ffmpegUIConfig);
 
             builder.Services.AddScoped<IQFileServerApiService, QFileServerApiService>();
+            builder.Services.AddScoped<IFFMpegUIApiService, FFMpegApiService>();
 
-            builder.Services.AddScoped<IFFMpegConvertingService, FFMpegService>();
-            builder.Services.AddScoped<IFFMpegManagementService, FFMpegService>();
+            builder.Services.AddSingleton<BackgroundTaskQueue>();
+            builder.Services.AddHostedService<ConvertProcessTaskRunner>();
+
+            builder.Services.AddScoped<IFFMpegManagementService, FFMpegManagementService>();
 
             var app = builder.Build();
 
