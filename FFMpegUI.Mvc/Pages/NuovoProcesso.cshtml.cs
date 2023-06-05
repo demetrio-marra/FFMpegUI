@@ -65,9 +65,9 @@ namespace FFMpegUI.Mvc.Pages
                 command.VideoCodec = VideoCodec;
                 command.RescaleHorizontalWidth = RescaleHorizontalWidth;
 
-                await service.CreateProcess(command);
+                var process = await service.CreateProcess(command);
 
-                return RedirectToPage("/Processi");
+                return RedirectToPage("/DettaglioProcesso", new { id = process.ProcessId });
             }
 
             return Page();

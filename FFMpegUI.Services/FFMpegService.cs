@@ -37,7 +37,7 @@ namespace FFMpegUI.Services
             throw new NotImplementedException();
         }
 
-        async Task IFFMpegManagementService.CreateProcess(FFMpegCreateProcessCommand command)
+        async Task<FFMpegProcess> IFFMpegManagementService.CreateProcess(FFMpegCreateProcessCommand command)
         {
             var submissionDate = DateTime.Now;
 
@@ -85,6 +85,9 @@ namespace FFMpegUI.Services
                 await processFeaturesRepository.CreateAsync(eProcessFeatures);
 
                 await processRepository.ConfirmTransactionAsync(transactionId);
+
+                var ret = await GetProcessAndItems(persistedProcessId);
+                return ret;
             }
             catch
             {
