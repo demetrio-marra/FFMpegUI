@@ -1,15 +1,11 @@
-﻿using FFMpegUI.Persistence.Definitions.Repositories;
-using FFMpegUI.Persistence.Entities;
-using PagedList.Core;
+﻿using FFMpegUI.Persistence.Entities;
 
 namespace FFMpegUI.Persistence.Repositories
 {
-    public interface IFFMpegProcessFeaturesRepository : IFFMpegRepository
+    public interface IFFMpegProcessFeaturesRepository
     {
-        Task<FFMpegPersistedProcessFeatures> CreateAsync(FFMpegPersistedProcessFeatures createdProcessFeature);
-        Task<FFMpegPersistedProcessFeatures> GetAsync(int processFeatureId);
-        Task<IPagedList<FFMpegPersistedProcessFeatures>> GetAllAsync(int pageNumber, int pageSize);
-        Task<FFMpegPersistedProcessFeatures> UpdateAsync(FFMpegPersistedProcessFeatures updatedProcessFeature);
-        Task DeleteAsync(int processFeatureId);
+        Task CreateAsync(FFMpegPersistedProcessFeatures createdProcessFeature);
+        Task<FFMpegPersistedProcessFeatures> GetAsync(int processId);
+        Task DeleteAsync(int processId);
     }
 }

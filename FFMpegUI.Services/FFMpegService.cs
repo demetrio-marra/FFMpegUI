@@ -58,8 +58,11 @@ namespace FFMpegUI.Services
             var newProcess = new FFMpegProcess
             {
                 SubmissionDate = submissionDate,
-                 Items = processItemsList,
-                  
+                Items = processItemsList,
+                AudioCodec = command.AudioCodec,
+                OverallConversionQuality = command.OverallConversionQuality,
+                VideoCodec = command.VideoCodec,
+                RescaleHorizontalWidth = command.RescaleHorizontalWidth                
             };
 
             var eProcess = mapper.Map<FFMpegPersistedProcess>(newProcess);
@@ -71,6 +74,7 @@ namespace FFMpegUI.Services
             {
                 var persistedProcess = await processRepository.CreateAsync(eProcess);
                 var persistedProcessId = persistedProcess.Id;
+                eProcessFeatures.ProcessId = persistedProcessId;
 
                 foreach (var eProcessItem in eProcessItems)
                 {
@@ -78,7 +82,7 @@ namespace FFMpegUI.Services
                 }
                 var persistedProcessItems = await processItemsRepository.CreateAsync(eProcessItems);
 
-                var persistedProcessFeatures = await processFeaturesRepository.CreateAsync(eProcessFeatures);
+                await processFeaturesRepository.CreateAsync(eProcessFeatures);
 
                 await processRepository.ConfirmTransactionAsync(transactionId);
             }

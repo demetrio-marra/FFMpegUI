@@ -7,6 +7,8 @@ services:
     environment:
       - SA_PASSWORD=yourStrong!Passw0rd
       - ACCEPT_EULA=Y
+    volumes:
+      - C:\Users\dmarra\Desktop\FFMpegUIDemo\QFileServerSqlData:/var/opt/mssql/data
 
   qfileserver:
     image: "demetriomarra3/qfileserver"
@@ -17,14 +19,27 @@ services:
     depends_on:
       - qfileserverdb
     volumes:
-      - C:\Users\dmarra\Desktop\QFileServerData:/app/nasroot
+      - C:\Users\dmarra\Desktop\FFMpegUIDemo\QFileServerNas:/app/nasroot
  
   ffmpeguisql:
     image: "mcr.microsoft.com/mssql/server"
     environment:
       - SA_PASSWORD=yourStrong!Passw0rd
       - ACCEPT_EULA=Y
- 
+    volumes:
+      - C:\Users\dmarra\Desktop\FFMpegUIDemo\FFMpegUISqlData:/var/opt/mssql/data
+  
+  ffmpeguinosql:
+    image: ravendb/ravendb:latest
+    ports:
+      - 8080:8080
+    environment:
+      - RAVEN_Setup_Mode=None
+      - RAVEN_License_Eula_Accepted=true
+      - RAVEN_Security_UnsecuredAccessAllowed=PublicNetwork
+    volumes:
+      - C:\\Users\\dmarra\\Desktop\\FFMpegUIDemo\\RavenDbData:/data 
+
   ffmpegui.mvc:
     image: ${DOCKER_REGISTRY-}ffmpeguimvc
     #container_name: ffmpegui.mvc
@@ -37,5 +52,9 @@ services:
     environment:
       - ConnectionStrings__SqlDb=Server=ffmpeguisql;Database=FFMpegUI;User Id=sa;Password=yourStrong!Passw0rd;
       - QFileServerApiUrl=http://qfileserver
+      - RavenDb__Urls=http://ffmpeguinosql:8080
+      - RavenDb__Database=FFMpegUI
     depends_on:
       - ffmpeguisql
+      - ffmpeguinosql
+

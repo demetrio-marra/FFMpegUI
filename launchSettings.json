@@ -3,14 +3,12 @@
     "Docker Compose": {
       "commandName": "DockerCompose",
       "commandVersion": "1.0",
-      "composeLaunchAction": "LaunchBrowser",
-      "composeLaunchServiceName": "ffmpegui.mvc",
-      "composeLaunchUrl": "{Scheme}://localhost:{ServicePort}",
       "serviceActions": {
         "ffmpegui.mvc": "StartDebugging",
         "ffmpeguisql": "StartWithoutDebugging",
         "qfileserver": "StartWithoutDebugging",
-        "qfileserverdb": "StartWithoutDebugging"
+        "qfileserverdb": "StartWithoutDebugging",
+        "ffmpeguinosql": "StartWithoutDebugging"
       }
     }
   }

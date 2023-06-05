@@ -6,6 +6,9 @@ using FFMpegUI.Services.Configuration;
 using FFMpegUI.Services.Middlewares;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Raven.Client.Documents.Indexes;
+using Raven.Client.Documents;
+using Microsoft.Extensions.Configuration;
 
 namespace FFMpegUI.Mvc
 {
@@ -44,26 +47,6 @@ namespace FFMpegUI.Mvc
                 client.BaseAddress = new Uri(url);
             });
 
-
-            //// RavenDB Configuration
-            //builder.Services.AddRavenDbDocStore(options =>
-            //{
-            //    options.Settings = new RavenSettings
-            //    {
-            //        Urls = builder.Configuration.GetValue<string[]>("RavenDb:Urls") ,
-            //        DatabaseName = builder.Configuration.GetValue<string>("RavenDb:Database")
-            //        // Configure any additional settings here...
-            //    };
-            //    options.SectionName = "RavenDb";
-            //    options.GetConfiguration = builder.Configuration;
-
-            //    // If using a certificate
-            //    // options.Certificate = new X509Certificate2("path-to-certificate", "optional-password");
-
-            //    // BeforeInitializeDocStore and AfterInitializeDocStore can be used to execute code before and after the document store is initialized, respectively.
-            //    // For example, to set conventions or register indexes.
-            //});
-
             builder.Services.AddAutoMapper(
                 typeof(Program).Assembly,
                 typeof(FFMpegPersistenceMapperProfile).Assembly
@@ -72,6 +55,32 @@ namespace FFMpegUI.Mvc
             builder.Services.AddScoped<IFFMpegProcessFeaturesRepository, RavenFFMpegProcessFeaturesRepository>();
             builder.Services.AddScoped<IFFMpegProcessRepository, SQLFFMpegProcessRepository>();
             builder.Services.AddScoped<IFFMpegProcessItemsRepository, SQLFFMpegProcessItemsRepository>();
+
+            // raven
+            var ravenUrls = builder.Configuration.GetValue<string>("RavenDb:Urls").Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            var store = new DocumentStore
+            {
+                Urls = ravenUrls,
+                Database = builder.Configuration.GetValue<string>("RavenDb:Database")
+            };
+
+            store.Initialize();
+
+            using (var session = store.OpenSession())
+            {
+                var databaseNames = session.Advanced.DocumentStore.Maintenance.Server.Send(new Raven.Client.ServerWide.Operations.GetDatabaseNamesOperation(0, int.MaxValue));
+                var databaseExists = databaseNames.Contains(store.Database, StringComparer.OrdinalIgnoreCase);
+
+                if (!databaseExists)
+                {
+                    session.Advanced.DocumentStore.Maintenance.Server.Send(new Raven.Client.ServerWide.Operations.CreateDatabaseOperation(new Raven.Client.ServerWide.DatabaseRecord(store.Database)));
+                }
+
+                // Perform any required initialization operations, such as creating indexes or setting up document types
+                IndexCreation.CreateIndexes(typeof(Program).Assembly, store);
+            }
+
+            builder.Services.AddSingleton<IDocumentStore>(store);
 
             // Build the FFMpegUIServiceConfiguration object from the configuration section
             var ffmpegUIConfig = builder.Configuration.GetSection("FFMpegUI").Get<FFMpegUIServiceConfiguration>();

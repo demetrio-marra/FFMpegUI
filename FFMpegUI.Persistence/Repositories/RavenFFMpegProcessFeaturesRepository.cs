@@ -1,59 +1,54 @@
-﻿using AutoMapper;
-using FFMpegUI.Persistence.Definitions.Repositories;
-using FFMpegUI.Persistence.Entities;
-using PagedList.Core;
+﻿using FFMpegUI.Persistence.Entities;
+using Raven.Client.Documents;
+using Raven.Client.Documents.Linq;
 
 namespace FFMpegUI.Persistence.Repositories
 {
     public class RavenFFMpegProcessFeaturesRepository : IFFMpegProcessFeaturesRepository
     {
-        private readonly IMapper mapper;
+        private readonly IDocumentStore documentStore;
 
         public RavenFFMpegProcessFeaturesRepository(
-            IMapper mapper
+            IDocumentStore documentStore
             )
         {
-            this.mapper = mapper;
+            this.documentStore = documentStore;
         }
 
-        async Task IFFMpegRepository.ConfirmTransactionAsync(string transactionId)
+        async Task IFFMpegProcessFeaturesRepository.CreateAsync(FFMpegPersistedProcessFeatures createdProcessFeature)
         {
-            await Task.CompletedTask; // raven no transaction
-        }
+            using (var session = documentStore.OpenSession())
+            {
+                session.Store(createdProcessFeature);
+                session.SaveChanges();
+            }
 
-        async Task<string> IFFMpegRepository.BeginTransactionAsync()
-        {
-            return await Task.FromResult(string.Empty); // raven no transaction
-        }
-
-        async Task<FFMpegPersistedProcessFeatures> IFFMpegProcessFeaturesRepository.CreateAsync(FFMpegPersistedProcessFeatures createdProcessFeature)
-        {
-            return await Task.FromResult(createdProcessFeature);
+            await Task.CompletedTask;
         }
 
         async Task IFFMpegProcessFeaturesRepository.DeleteAsync(int processFeatureId)
         {
-            await Task.CompletedTask;
+            using (var session = documentStore.OpenSession())
+            {
+                var product = session.Query<FFMpegPersistedProcessFeatures>()
+                    .Where(p => p.ProcessId == processFeatureId)
+                    .Single();
+                session.Delete(product);
+                session.SaveChanges();
+            }
         }
 
-        async Task<IPagedList<FFMpegPersistedProcessFeatures>> IFFMpegProcessFeaturesRepository.GetAllAsync(int pageNumber, int pageSize)
-        {
-            return new PagedList<FFMpegPersistedProcessFeatures>(Enumerable.Empty<FFMpegPersistedProcessFeatures>(), 1, 10);
-        }
-
+    
         async Task<FFMpegPersistedProcessFeatures> IFFMpegProcessFeaturesRepository.GetAsync(int processFeatureId)
         {
-            return await Task.FromResult(new  FFMpegPersistedProcessFeatures());
-        }
+            using var session = documentStore.OpenSession();
+            // Use the session to query or store data
+            var results = session.Query<FFMpegPersistedProcessFeatures>()
+                .Where(p => p.ProcessId == processFeatureId)
+                .Single();
 
-        async Task IFFMpegRepository.RejectTransactionAsync(string transactionId)
-        {
-            await Task.CompletedTask; // raven no transaction
-        }
+            return await Task.FromResult(results);
 
-        async Task<FFMpegPersistedProcessFeatures> IFFMpegProcessFeaturesRepository.UpdateAsync(FFMpegPersistedProcessFeatures updatedProcessFeature)
-        {
-            return await Task.FromResult(updatedProcessFeature);
         }
     }
 }
