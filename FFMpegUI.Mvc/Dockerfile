@@ -1,32 +1,25 @@
-# See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
-FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
-WORKDIR /app
-EXPOSE 80
+#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 
-# Install Dockerize
-ENV DOCKERIZE_VERSION v0.6.1
-RUN apt-get update \
-    && apt-get install -y wget \
-    && wget https://github.com/jwilder/dockerize/releases/download/$DOCKERIZE_VERSION/dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
-    && tar -C /usr/local/bin -xzvf dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
-    && rm dockerize-linux-amd64-$DOCKERIZE_VERSION.tar.gz \
-    && apt-get remove -y wget \
-    && rm -rf /var/lib/apt/lists/*
-
 WORKDIR /src
-COPY ["FFMpegUI/FFMpegUI.csproj", "FFMpegUI/"]
-RUN dotnet restore "FFMpegUI/FFMpegUI.csproj"
-COPY . .
-WORKDIR "/src/FFMpegUI"
-RUN dotnet build "FFMpegUI.csproj" -c Release -o /app/build
+COPY ["FFMpegUI.Mvc", "FFMpegUI.Mvc/"]
+COPY ["FFMpegUI.Infrastructure", "FFMpegUI.Infrastructure/"]
+COPY ["FFMpegUI.Persistence", "FFMpegUI.Persistence/"]
+COPY ["FFMpegUI.Persistence.Definitions", "FFMpegUI.Persistence.Definitions/"]
+COPY ["FFMpegUI", "FFMpegUI/"]
+COPY ["FFMpegUI.Services", "FFMpegUI.Services/"]
+RUN dotnet restore "FFMpegUI.Mvc/FFMpegUI.Mvc.csproj"
+WORKDIR "/src/FFMpegUI.Mvc"
+RUN dotnet build "FFMpegUI.Mvc.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "FFMpegUI.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "FFMpegUI.Mvc.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
-FROM base AS final
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS final
+RUN apt-get install -y netcat
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "FFMpegUI.dll"]
+
+ENTRYPOINT ["dotnet", "FFMpegUI.Mvc.dll"]
+
