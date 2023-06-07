@@ -21,7 +21,6 @@ RUN dotnet publish "FFMpegUI.Api.csproj" -c Release -o /app/publish /p:UseAppHos
 
 FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS final
 RUN apt-get update && apt-get install -y ffmpeg
-RUN apt-get install -y netcat
 WORKDIR /app
 COPY --from=publish /app/publish .
 

@@ -17,7 +17,6 @@ FROM build AS publish
 RUN dotnet publish "FFMpegUI.Mvc.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS final
-RUN apt-get install -y netcat
 WORKDIR /app
 COPY --from=publish /app/publish .
 

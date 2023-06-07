@@ -12,7 +12,6 @@ services:
 
   qfileserver:
     image: "demetriomarra3/qfileserver"
-    #command: ["./dockerize", "-wait", "tcp://qfileserverdb:1433", "-timeout", "60s"]
     environment:
       - ConnectionStrings__DefaultConnectionString=Server=qfileserverdb;Initial Catalog=QFileServer;Persist Security Info=False;User ID=sa;Password=yourStrong!Passw0rd;
       - QFileServiceConfiguration__FileServerRootPath=/app/nasroot
@@ -48,8 +47,6 @@ services:
 
   ffmpegui.mvc:
     image: ${DOCKER_REGISTRY-}ffmpeguimvc
-    #container_name: ffmpegui.mvc
-    #command: ["./dockerize", "-wait", "tcp://ffmpeguisql:1433", "-timeout", "60s"]
     build:
       context: .
       dockerfile: FFMpegUI.Mvc/Dockerfile
