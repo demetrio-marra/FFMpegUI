@@ -8,7 +8,6 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Raven.Client.Documents.Indexes;
 using Raven.Client.Documents;
-using Microsoft.Extensions.Configuration;
 using FFMpegUI.Infrastructure.Support;
 
 namespace FFMpegUI.Mvc
@@ -107,6 +106,9 @@ namespace FFMpegUI.Mvc
 
             builder.Services.AddScoped<IFFMpegManagementService, FFMpegManagementService>();
 
+            // Set URLs
+            builder.WebHost.UseUrls("http://*:80");
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -127,19 +129,54 @@ namespace FFMpegUI.Mvc
 
             app.MapRazorPages();
 
-            // Get an instance of IServiceProvider from the host
-            using (var scope = app.Services.CreateScope())
-            {
-                var services = scope.ServiceProvider;
+            Task.Run(async () => {
+                using (var scope = app.Services.CreateScope())
+                {
+                    // Resolve YourDbContext within the scope
+                    var dbContext = scope.ServiceProvider.GetRequiredService<FFMpegDbContext>();
 
-                // Resolve YourDbContext within the scope
-                var dbContext = services.GetRequiredService<FFMpegDbContext>();
+                    await waitForDb(dbContext);
 
-                // Apply migrations
-                dbContext.Database.Migrate();
-            }
+                    // ... other initializations, e.g. seeding db ...
+                    
+
+                    // Apply migrations
+                    dbContext.Database.Migrate();
+                }
+            }).Wait();
+
 
             app.Run();
+        }
+
+
+        private static async Task waitForDb(FFMpegDbContext dbContext)
+        {
+            // create your own connection checker here
+            // see https://stackoverflow.com/questions/19211082/testing-an-entity-framework-database-connection
+
+            var maxAttemps = 12;
+            var delay = 5000;
+
+            for (int i = 0; i < maxAttemps; i++)
+            {
+                try
+                {
+                    await dbContext.Database.OpenConnectionAsync();
+                    await dbContext.Database.CloseConnectionAsync();
+                    Console.WriteLine("Database connection test successfull");
+                    return;
+                }
+                catch (SqlException)
+                {
+                    Console.WriteLine("Database connection test FAIL");
+                }
+                await Task.Delay(delay);
+            }
+
+            Console.WriteLine("Database connection test FAIL. Give up!");
+            // after a few attemps we give up
+            throw new HttpRequestException("Loading exception");
         }
     }
 }
