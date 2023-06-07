@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Raven.Client.Documents.Indexes;
 using Raven.Client.Documents;
 using FFMpegUI.Infrastructure.Support;
+using FFMpegUI.Infrastructure.Resilience;
 
 namespace FFMpegUI.Mvc
 {
@@ -36,6 +37,8 @@ namespace FFMpegUI.Mvc
 
                 options.UseSqlServer(sqlConnectionStringBuilder.ConnectionString, b => b.MigrationsAssembly("FFMpegUI.Mvc"));
             });
+
+            builder.Services.AddSingleton<ResilientPoliciesLocator>();
 
             builder.Services.AddHttpClient("QFileServerApiServiceClient", client =>
             {
@@ -132,51 +135,21 @@ namespace FFMpegUI.Mvc
             Task.Run(async () => {
                 using (var scope = app.Services.CreateScope())
                 {
-                    // Resolve YourDbContext within the scope
-                    var dbContext = scope.ServiceProvider.GetRequiredService<FFMpegDbContext>();
+                    var policyLocator = scope.ServiceProvider.GetRequiredService<ResilientPoliciesLocator>();
+                    var sqlPolicy = policyLocator.GetPolicy(ResilientPolicyType.SqlDatabase);
 
-                    await waitForDb(dbContext);
+                    await sqlPolicy.ExecuteAsync(async () =>
+                    {
+                        // Resolve YourDbContext within the scope
+                        var dbContext = scope.ServiceProvider.GetRequiredService<FFMpegDbContext>();
 
-                    // ... other initializations, e.g. seeding db ...
-                    
-
-                    // Apply migrations
-                    dbContext.Database.Migrate();
+                        // Apply migrations
+                        await dbContext.Database.MigrateAsync();
+                    });
                 }
             }).Wait();
 
-
             app.Run();
-        }
-
-
-        private static async Task waitForDb(FFMpegDbContext dbContext)
-        {
-            // create your own connection checker here
-            // see https://stackoverflow.com/questions/19211082/testing-an-entity-framework-database-connection
-
-            var maxAttemps = 12;
-            var delay = 5000;
-
-            for (int i = 0; i < maxAttemps; i++)
-            {
-                try
-                {
-                    await dbContext.Database.OpenConnectionAsync();
-                    await dbContext.Database.CloseConnectionAsync();
-                    Console.WriteLine("Database connection test successfull");
-                    return;
-                }
-                catch (SqlException)
-                {
-                    Console.WriteLine("Database connection test FAIL");
-                }
-                await Task.Delay(delay);
-            }
-
-            Console.WriteLine("Database connection test FAIL. Give up!");
-            // after a few attemps we give up
-            throw new HttpRequestException("Loading exception");
         }
     }
 }
