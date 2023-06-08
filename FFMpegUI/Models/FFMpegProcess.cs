@@ -11,5 +11,7 @@
         public FFMpegAudioCodecType? AudioCodec { get; set; }
         public FFMpegVideoCodecType? VideoCodec { get; set; }
         public int? RescaleHorizontalWidth { get; set; }
+        public long? SourceFilesTotalSize { get; set; }
+        public long? ConvertedFilesTotalSize { get; set; }
     }
 }

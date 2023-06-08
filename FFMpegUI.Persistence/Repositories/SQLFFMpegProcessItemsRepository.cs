@@ -19,7 +19,7 @@ namespace FFMpegUI.Persistence.Repositories
             return createdProcessItems;
         }
 
-        async Task IFFMpegProcessItemsRepository.UpdateEndInfo(int processItemId, DateTime? endDate, long? convertedFileId, string? convertedFileName, bool? success, string? errorMessage)
+        async Task IFFMpegProcessItemsRepository.UpdateEndInfo(int processItemId, DateTime? endDate, long? convertedFileId, string? convertedFileName, long? convertedFileSize, bool? success, string? errorMessage)
         {
             var item = await dbContext.ProcessItems.FindAsync(processItemId);
             item.EndDate = endDate;
@@ -27,6 +27,7 @@ namespace FFMpegUI.Persistence.Repositories
             item.ConvertedFileName = convertedFileName;
             item.Successfull = success;
             item.ErrorMessage = errorMessage;
+            item.ConvertedFileSize = convertedFileSize;
             await dbContext.SaveChangesAsync();
         }
 

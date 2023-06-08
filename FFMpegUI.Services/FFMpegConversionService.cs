@@ -32,16 +32,19 @@ namespace FFMpegUI.Services
 
             // carichiamo su qfileserver            
             long retId = 0;
+            long fileSize = 0;
             using (var upStream = new FileStream(targetFilePath, FileMode.Open, FileAccess.Read))
             {
                 var dto = await fileServerApiService.UploadFile(upStream, targetFileName);
+                fileSize = dto.Size;
                 retId = dto.Id;
             }
 
             var ret = new FFMpegConvertedFileDTO
             {
                 Filename = targetFileName,
-                QFileServerId = retId
+                QFileServerId = retId,
+                Filesize = fileSize
             };
 
             Directory.Delete(tempDir, true);

@@ -21,6 +21,8 @@ namespace FFMpegUI.Mvc.Pages
         public FFMpegVideoCodecType? VideoCodec { get; set; }
 
         public int? RescaleHorizontalWidth { get; set; }
+        public long? SourceFilesTotalSize { get; set; }
+        public long? ConvertedFilesTotalSize { get; set; }
 
 
         public DettaglioProcessoModel(ILogger<DettaglioProcessoModel> logger,
@@ -41,6 +43,8 @@ namespace FFMpegUI.Mvc.Pages
             AudioCodec = process.AudioCodec;
             VideoCodec = process.VideoCodec;
             RescaleHorizontalWidth = process.RescaleHorizontalWidth;
+            SourceFilesTotalSize = process.SourceFilesTotalSize;
+            ConvertedFilesTotalSize = process.ConvertedFilesTotalSize;
 
             ViewData["Title"] = $"Dettaglio processo {id}";
         }

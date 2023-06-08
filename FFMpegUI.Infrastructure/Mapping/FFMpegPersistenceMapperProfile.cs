@@ -26,7 +26,9 @@ namespace FFMpegUI.Persistence.Mapping
                    OverallConversionQuality = src.Item2.OverallConversionQuality,
                    AudioCodec = src.Item2.AudioCodec,
                    VideoCodec = src.Item2.VideoCodec,
-                   RescaleHorizontalWidth = src.Item2.RescaleHorizontalWidth
+                   RescaleHorizontalWidth = src.Item2.RescaleHorizontalWidth,
+                   ConvertedFilesTotalSize = src.Item1.ConvertedFilesTotalSize,
+                   SourceFilesTotalSize = src.Item1.SourceFilesTotalSize
                });
         }
     }

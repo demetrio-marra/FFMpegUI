@@ -19,12 +19,6 @@ namespace FFMpegUI.Mvc
         {
             var builder = WebApplication.CreateBuilder(args);
 
-            // Add services to the container.
-            builder.Services.AddRazorPages();
-
-            // Configure the HTTP request pipeline.
-
-            // Set the certificate validation callback
             builder.Services.AddDbContext<FFMpegDbContext>(options =>
             {
                 var connectionString = builder.Configuration.GetConnectionString("SqlDb");
@@ -32,7 +26,7 @@ namespace FFMpegUI.Mvc
                 var sqlConnectionStringBuilder = new SqlConnectionStringBuilder(connectionString)
                 {
                     TrustServerCertificate = true // Ignore SSL certificate validation
-                    //SslMode = SslMode.VerifyCA
+                                                  //SslMode = SslMode.VerifyCA
                 };
 
                 options.UseSqlServer(sqlConnectionStringBuilder.ConnectionString, b => b.MigrationsAssembly("FFMpegUI.Mvc"));
@@ -108,6 +102,8 @@ namespace FFMpegUI.Mvc
             builder.Services.AddHostedService<ConvertProcessTaskRunner>();
 
             builder.Services.AddScoped<IFFMpegManagementService, FFMpegManagementService>();
+
+            builder.Services.AddRazorPages();
 
             // Set URLs
             builder.WebHost.UseUrls("http://*:80");

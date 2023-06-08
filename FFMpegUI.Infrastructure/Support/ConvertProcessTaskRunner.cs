@@ -86,6 +86,7 @@ namespace FFMpegUI.Infrastructure.Support
                 long? convertedFileId = null;
                 string? convertedFileName = null;
                 string? errorMessage = null;
+                long? convertedFileSize = null;
                 DateTime? endDate;
 
                 try
@@ -97,6 +98,7 @@ namespace FFMpegUI.Infrastructure.Support
                     successfull = true;
                     convertedFileName = convertedFileDTO.Filename;
                     convertedFileId = convertedFileDTO.QFileServerId;
+                    convertedFileSize = convertedFileDTO.Filesize;
                 }
                 catch (Exception ex)
                 {
@@ -108,7 +110,7 @@ namespace FFMpegUI.Infrastructure.Support
                     endDate = DateTime.Now;
                 }
 
-                await processItemsRepository.UpdateEndInfo(processItemId, endDate, convertedFileId, convertedFileName, successfull, errorMessage);
+                await processItemsRepository.UpdateEndInfo(processItemId, endDate, convertedFileId, convertedFileName, convertedFileSize, successfull, errorMessage);
             }
         }
 

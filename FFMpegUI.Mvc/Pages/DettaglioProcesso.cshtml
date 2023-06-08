@@ -1,4 +1,5 @@
 ﻿@page
+@using FFMpegUI.Mvc.Helpers;
 @model FFMpegUI.Mvc.Pages.DettaglioProcessoModel
 
 <h1>@ViewData["Title"]</h1>
@@ -30,7 +31,9 @@
     <thead>
         <tr>
             <th scope="col">Original</th>
+            <th scope="col">Size</th>
             <th scope="col">Converted</th>
+            <th scope="col">Size</th>
             <th scope="col">Start</th>
             <th scope="col">End</th>
             <th scope="col">State</th>
@@ -47,7 +50,9 @@
 
             <tr>
                 <td><a asp-page-handler="Download" asp-route-id="@item.SourceFileId">@item.SourceFileName</a></td>
+                <td>@(item.SourceFileSize.HasValue ? FileSystemHelper.FormatFileSize(item.SourceFileSize.Value) : "N/A")</td>
                 <td><a asp-page-handler="Download" asp-route-id="@item.ConvertedFileId">@item.ConvertedFileName</a></td>
+                <td>@(item.ConvertedFileSize.HasValue ? FileSystemHelper.FormatFileSize(item.ConvertedFileSize.Value) : "N/A")</td>
                 <td>@(item.StartDate.HasValue ? item.StartDate.Value.ToString("g") : "N/A")</td>
                 <td>@(item.EndDate.HasValue ? item.EndDate.Value.ToString("g") : "N/A")</td>
                 <td>@message</td>

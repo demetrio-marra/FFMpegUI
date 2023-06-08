@@ -1,6 +1,4 @@
-﻿using FFMpegUI.Models;
-
-namespace FFMpegUI.Persistence.Entities
+﻿namespace FFMpegUI.Persistence.Entities
 {
     public class FFMpegPersistedProcess
     {
@@ -9,5 +7,7 @@ namespace FFMpegUI.Persistence.Entities
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public ICollection<FFMpegPersistedProcessItem> Items { get; set; } = new List<FFMpegPersistedProcessItem>();
+        public long? SourceFilesTotalSize { get; set; }
+        public long? ConvertedFilesTotalSize { get; set; }
     }
 }

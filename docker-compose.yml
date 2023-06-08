@@ -27,6 +27,8 @@ services:
       - ACCEPT_EULA=Y
     volumes:
       - C:\Users\dmarra\Desktop\FFMpegUIDemo\FFMpegUISqlData:/var/opt/mssql/data
+    ports:
+      - 1433:1433
   
   ffmpeguinosql:
     image: ravendb/ravendb:latest
