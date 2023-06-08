@@ -1,10 +1,11 @@
 ﻿using FFMpegUI.Infrastructure.Support;
+using FFMpegUI.Resilience;
 using Microsoft.Data.SqlClient;
 using Polly;
 
 namespace FFMpegUI.Infrastructure.Resilience
 {
-    public class ResilientPoliciesLocator
+    public class ResilientPoliciesLocator : IResilientPoliciesLocator
     {
         private readonly IAsyncPolicy SqlPolicy;
 

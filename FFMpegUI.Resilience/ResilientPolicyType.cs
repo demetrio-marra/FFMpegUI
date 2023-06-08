@@ -1,4 +1,4 @@
-﻿namespace FFMpegUI.Infrastructure.Resilience
+﻿namespace FFMpegUI.Resilience
 {
     public enum ResilientPolicyType
     {

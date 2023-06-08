@@ -10,6 +10,7 @@ using Raven.Client.Documents.Indexes;
 using Raven.Client.Documents;
 using FFMpegUI.Infrastructure.Support;
 using FFMpegUI.Infrastructure.Resilience;
+using FFMpegUI.Resilience;
 
 namespace FFMpegUI.Mvc
 {
@@ -32,7 +33,7 @@ namespace FFMpegUI.Mvc
                 options.UseSqlServer(sqlConnectionStringBuilder.ConnectionString, b => b.MigrationsAssembly("FFMpegUI.Mvc"));
             });
 
-            builder.Services.AddSingleton<ResilientPoliciesLocator>();
+            builder.Services.AddSingleton<IResilientPoliciesLocator, ResilientPoliciesLocator>();
 
             builder.Services.AddHttpClient("QFileServerApiServiceClient", client =>
             {
