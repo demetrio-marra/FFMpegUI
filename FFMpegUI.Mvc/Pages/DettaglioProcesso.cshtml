@@ -59,4 +59,13 @@
             </tr>
         }
     </tbody>
+    <tfoot>
+        <tr>
+            <td></td>
+            <td>@(Model.SourceFilesTotalSize.HasValue ? FileSystemHelper.FormatFileSize(Model.SourceFilesTotalSize.Value) : "N/A")</td>
+            <td></td>
+            <td>@(Model.ConvertedFilesTotalSize.HasValue ? FileSystemHelper.FormatFileSize(Model.ConvertedFilesTotalSize.Value) : "N/A")</td>
+            <td colspan="3"></td>
+        </tr>
+    </tfoot>
 </table>

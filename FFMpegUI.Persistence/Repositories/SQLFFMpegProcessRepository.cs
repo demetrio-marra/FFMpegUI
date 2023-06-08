@@ -42,5 +42,13 @@ namespace FFMpegUI.Persistence.Repositories
 
             return ret;
         }
+
+        async Task IFFMpegProcessRepository.UpdateConversionCompletedData(int processId, long convertedFilesTotalSize, DateTime? processEndDate)
+        {
+            var process = await dbContext.Processes.FindAsync(processId);
+            process.ConvertedFilesTotalSize = convertedFilesTotalSize;
+            process.EndDate = processEndDate;
+            await dbContext.SaveChangesAsync();
+        }
     }
 }

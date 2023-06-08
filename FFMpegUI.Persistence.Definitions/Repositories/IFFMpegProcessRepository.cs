@@ -14,5 +14,7 @@ namespace FFMpegUI.Persistence.Repositories
         Task<FFMpegPersistedProcess> UpdateAsync(FFMpegPersistedProcess updatedProcess);
         Task DeleteAsync(int processId);
         Task<FFMpegPersistedProcess> GetWithItemsAsync(int processId);
+        Task UpdateConversionCompletedData(int processId, long convertedFilesTotalSize, DateTime? processEndDate);
+
     }
 }

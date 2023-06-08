@@ -1,5 +1,6 @@
 ﻿@page
 @model ProcessiModel
+@using FFMpegUI.Mvc.Helpers;
 @using PagedList.Core;
 @addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
 
@@ -18,6 +19,7 @@
             <th scope="col">Start Date</th>
             <th scope="col">End Date</th>
             <th scope="col">Files Count</th>
+            <th scope="col">Total size</th>
         </tr>
     </thead>
     <tbody>
@@ -30,6 +32,7 @@
                 <td>@(item.StartDate.HasValue ? item.StartDate.Value.ToString("g") : "N/A")</td>
                 <td>@(item.EndDate.HasValue ? item.EndDate.Value.ToString("g") : "N/A")</td>
                 <td>@item.FilesCount</td>
+                <th>@FileSystemHelper.FormatFileSize(item.TotalFilesSize)</th>
             </tr>
         }
     </tbody>

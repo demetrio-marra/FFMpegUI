@@ -12,5 +12,7 @@ namespace FFMpegUI.Services
         Task<FFMpegProcess> GetProcessDetails(int processId);
 
         Task<FFMpegFileDownloadDTO> GetFileForDownload(long fileId);
+
+        Task PerformProcessConversion(int processId);
     }
 }

@@ -53,7 +53,8 @@ namespace FFMpegUI.Services
                 processItemsList.Add(new FFMpegProcessItem
                 {
                     SourceFileName = f.UpcomingFileName,
-                    SourceFileId = uploadedFile.Id
+                    SourceFileId = uploadedFile.Id,
+                    SourceFileSize = uploadedFile.Size
                 });
             }
 
@@ -64,7 +65,8 @@ namespace FFMpegUI.Services
                 AudioCodec = command.AudioCodec,
                 OverallConversionQuality = command.OverallConversionQuality,
                 VideoCodec = command.VideoCodec,
-                RescaleHorizontalWidth = command.RescaleHorizontalWidth                
+                RescaleHorizontalWidth = command.RescaleHorizontalWidth     ,
+                SourceFilesTotalSize = processItemsList.Sum(f => f.SourceFileSize)
             };
 
             var eProcess = mapper.Map<FFMpegPersistedProcess>(newProcess);
@@ -137,6 +139,67 @@ namespace FFMpegUI.Services
         {
             var ret = await processRepository.GetAllSummaryAsync(pageNumber, pageSize);
             return ret;            
+        }
+
+        async Task IFFMpegManagementService.PerformProcessConversion(int processId)
+        {
+            var processo = await GetProcessAndItems(processId);
+
+            var parametriConversione = new FFMpegConvertParameters
+            {
+                AudioCodec = processo.AudioCodec,
+                OverallConversionQuality = processo.OverallConversionQuality,
+                RescaleHorizontalWidth = processo.RescaleHorizontalWidth,
+                VideoCodec = processo.VideoCodec
+            };
+
+            long convertedFilesTotalSize = 0;
+            DateTime? processStopDate = null;
+
+            foreach (var item in processo.Items)
+            {
+                var processItemId = item.Id;
+
+                var sFileId = item.SourceFileId!.Value;
+
+                await processItemsRepository.UpdateStartInfo(processItemId, DateTime.Now);
+
+                var successfull = false;
+                long? convertedFileId = null;
+                string? convertedFileName = null;
+                string? errorMessage = null;
+                long? convertedFileSize = null;
+                DateTime? endDate;
+
+                try
+                {
+                    // chiamo il servizio di conversione passandogli l'id del file su QFileServer
+                    // Lo stesso servizio caricherà su QFileServer il file convertito e ne restituirà l'id qui
+                    var convertedFileDTO = await apiService.Convert(sFileId, parametriConversione);
+
+                    successfull = true;
+                    convertedFileName = convertedFileDTO.Filename;
+                    convertedFileId = convertedFileDTO.QFileServerId;
+                    convertedFileSize = convertedFileDTO.Filesize;
+
+                    convertedFilesTotalSize += convertedFileSize.Value;
+                }
+                catch (Exception ex)
+                {
+                    successfull = false;
+                    errorMessage = ex.Message;
+                }
+                finally
+                {
+                    endDate = DateTime.Now;
+                    processStopDate = endDate;
+                }
+
+                await processItemsRepository.UpdateEndInfo(processItemId, endDate, convertedFileId, convertedFileName, convertedFileSize, successfull, errorMessage);
+            }
+
+            // aggiorna processo principale
+            await processRepository.UpdateConversionCompletedData(processId, convertedFilesTotalSize, processStopDate);
         }
     }
 }
