@@ -106,6 +106,18 @@ namespace FFMpegUI.Mvc
 
             builder.Services.AddRazorPages();
 
+            // Configure the maximum request body size before calling UseRouting, UseEndpoints, etc.
+            // 1_000_000_000 represents the new size limit in bytes (about 1GB in this example).
+            builder.Services.Configure<IISServerOptions>(options =>
+            {
+                options.MaxRequestBodySize = null; // 1_000_000_000;
+            });
+
+            builder.WebHost.ConfigureKestrel(serverOptions =>
+            {
+                serverOptions.Limits.MaxRequestBodySize = null; // 1_000_000_000;
+            });
+
             // Set URLs
             builder.WebHost.UseUrls("http://*:80");
 
