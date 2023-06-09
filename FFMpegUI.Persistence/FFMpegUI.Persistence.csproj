@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\FFMpegUI.Persistence.Definitions\FFMpegUI.Persistence.Definitions.csproj" />
+    <ProjectReference Include="..\FFMpegUI.Resilience\FFMpegUI.Resilience.csproj" />
     <ProjectReference Include="..\FFMpegUI\FFMpegUI.csproj" />
   </ItemGroup>
 

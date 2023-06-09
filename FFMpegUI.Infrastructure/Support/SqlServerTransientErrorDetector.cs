@@ -26,6 +26,16 @@ namespace FFMpegUI.Infrastructure.Support
         {
             if (ex != null)
             {
+                if (ex.Message.Contains("Execution Timeout Expired"))
+                {
+                    return true;
+                }
+
+                if (ex.Message.Contains("A network-related or instance-specific error occurred while establishing a connection to SQL Server"))
+                {
+                    return true;
+                }
+
                 foreach (SqlError err in ex.Errors)
                 {
                     if (TransientErrorNumbers.Contains(err.Number))

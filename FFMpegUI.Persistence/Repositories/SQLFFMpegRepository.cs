@@ -1,7 +1,9 @@
 ﻿using FFMpegUI.Persistence.Definitions.Repositories;
+using FFMpegUI.Resilience;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using PagedList.Core;
+using Polly;
 
 namespace FFMpegUI.Persistence.Repositories
 {
@@ -9,11 +11,13 @@ namespace FFMpegUI.Persistence.Repositories
     {
         private readonly IDictionary<string, IDbContextTransaction> transactions;
         private readonly FFMpegDbContext dbContext;
+        private readonly IAsyncPolicy sqlPolicy;
 
-        public SQLFFMpegRepository(FFMpegDbContext dbContext)
+        public SQLFFMpegRepository(FFMpegDbContext dbContext, IResilientPoliciesLocator policiesLocator)
         {
             transactions = new Dictionary<string, IDbContextTransaction>();
             this.dbContext = dbContext;
+            sqlPolicy = policiesLocator.GetPolicy(ResilientPolicyType.SqlDatabase);
         }
 
         async Task IFFMpegRepository.ConfirmTransactionAsync(string transactionId)
@@ -25,8 +29,11 @@ namespace FFMpegUI.Persistence.Repositories
 
             try
             {
-                await tran.CommitAsync();
-                await tran.DisposeAsync();
+                await sqlPolicy.ExecuteAsync(async () =>
+                {
+                    await tran.CommitAsync();
+                    await tran.DisposeAsync();
+                });
             }
             finally
             {
@@ -37,8 +44,13 @@ namespace FFMpegUI.Persistence.Repositories
         async Task<string> IFFMpegRepository.BeginTransactionAsync()
         {
             var tranid = Guid.NewGuid().ToString();
-            var tran = await dbContext.Database.BeginTransactionAsync();
-            transactions.Add(tranid, tran);
+
+            await sqlPolicy.ExecuteAsync(async () =>
+            {
+                var tran = await dbContext.Database.BeginTransactionAsync();
+                transactions.Add(tranid, tran);
+            });
+
             return tranid;
         }
 
@@ -51,8 +63,11 @@ namespace FFMpegUI.Persistence.Repositories
 
             try
             {
-                await tran.RollbackAsync();
-                await tran.DisposeAsync();
+                await sqlPolicy.ExecuteAsync(async () =>
+                {
+                    await tran.RollbackAsync();
+                    await tran.DisposeAsync();
+                });
             }
             finally
             {
@@ -63,46 +78,68 @@ namespace FFMpegUI.Persistence.Repositories
 
         public virtual async Task<TEntity> CreateAsync(TEntity entity)
         {
-            dbContext.Entry(entity).State = EntityState.Added;
-            await dbContext.SaveChangesAsync();
+            await sqlPolicy.ExecuteAsync(async () =>
+            {
+                dbContext.Entry(entity).State = EntityState.Added;
+                await dbContext.SaveChangesAsync();
+            });
+
             return entity;
         }
 
         public virtual async Task DeleteAsync(int id)
         {
-            var entity = await dbContext.FindAsync<TEntity>(id);
-            if (entity == null)
+            await sqlPolicy.ExecuteAsync(async () =>
             {
-                return;
-            }
+                var entity = await dbContext.FindAsync<TEntity>(id);
+                if (entity == null)
+                {
+                    return;
+                }
 
-            dbContext.Remove(entity);
-            await dbContext.SaveChangesAsync();
+                dbContext.Remove(entity);
+                await dbContext.SaveChangesAsync();
+            });
         }
 
         public virtual async Task<IPagedList<TEntity>> GetAllAsync(int pageNumber, int pageSize)
         {
             var skip = pageSize * (pageNumber - 1);
 
-            var result = dbContext.Set<TEntity>()
-                .OrderBy(a => EF.Property<int>(a, "Id"))
-                .AsNoTracking()
-                .ToPagedList(pageNumber, pageSize);
+            var ret = await sqlPolicy.ExecuteAsync(async () =>
+            {
+                var res = dbContext.Set<TEntity>()
+                    .OrderBy(a => EF.Property<int>(a, "Id"))
+                    .AsNoTracking()
+                    .ToPagedList(pageNumber, pageSize);
 
-            return await Task.FromResult(result);
+                return await Task.FromResult(res);
+            });
+
+            return await Task.FromResult(ret);
         }
 
         public virtual async Task<TEntity> GetAsync(int id)
         {
-            return await dbContext.Set<TEntity>()
+            var ret = await sqlPolicy.ExecuteAsync(async () =>
+            {
+                var res = await dbContext.Set<TEntity>()
                 .AsNoTracking()
                 .SingleAsync(e => EF.Property<int>(e, "Id") == id);
+
+                return res;
+            });
+
+            return ret;
         }
 
         public virtual async Task<TEntity> UpdateAsync(TEntity entity)
         {
-            dbContext.Entry(entity).State = EntityState.Modified;
-            await dbContext.SaveChangesAsync();
+            await sqlPolicy.ExecuteAsync(async () =>
+            {
+                dbContext.Entry(entity).State = EntityState.Modified;
+                await dbContext.SaveChangesAsync();
+            });
 
             return entity;
         }

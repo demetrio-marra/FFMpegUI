@@ -9,6 +9,7 @@ COPY ["FFMpegUI.Persistence", "FFMpegUI.Persistence/"]
 COPY ["FFMpegUI.Persistence.Definitions", "FFMpegUI.Persistence.Definitions/"]
 COPY ["FFMpegUI", "FFMpegUI/"]
 COPY ["FFMpegUI.Services", "FFMpegUI.Services/"]
+COPY ["FFMpegUI.Resilience", "FFMpegUI.Resilience/"]
 RUN dotnet restore "FFMpegUI.Api/FFMpegUI.Api.csproj"
 WORKDIR "/src/FFMpegUI.Api"
 RUN dotnet build "FFMpegUI.Api.csproj" -c Release -o /app/build

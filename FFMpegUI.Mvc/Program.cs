@@ -132,7 +132,7 @@ namespace FFMpegUI.Mvc
             Task.Run(async () => {
                 using (var scope = app.Services.CreateScope())
                 {
-                    var policyLocator = scope.ServiceProvider.GetRequiredService<ResilientPoliciesLocator>();
+                    var policyLocator = scope.ServiceProvider.GetRequiredService<IResilientPoliciesLocator>();
                     var sqlPolicy = policyLocator.GetPolicy(ResilientPolicyType.SqlDatabase);
 
                     await sqlPolicy.ExecuteAsync(async () =>
