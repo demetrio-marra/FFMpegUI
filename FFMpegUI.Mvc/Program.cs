@@ -11,6 +11,7 @@ using Raven.Client.Documents;
 using FFMpegUI.Infrastructure.Support;
 using FFMpegUI.Infrastructure.Resilience;
 using FFMpegUI.Resilience;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace FFMpegUI.Mvc
 {
@@ -108,6 +109,11 @@ namespace FFMpegUI.Mvc
 
             // Configure the maximum request body size before calling UseRouting, UseEndpoints, etc.
             // 1_000_000_000 represents the new size limit in bytes (about 1GB in this example).
+            builder.Services.Configure<FormOptions>(options =>
+            {
+                options.MultipartBodyLengthLimit = long.MaxValue;
+            });
+
             builder.Services.Configure<IISServerOptions>(options =>
             {
                 options.MaxRequestBodySize = null; // 1_000_000_000;
