@@ -44,6 +44,7 @@ namespace FFMpegUI.Mvc
                     throw new Exception("QFileServerApiUrl is null");
                 }
                 client.BaseAddress = new Uri(url);
+                client.Timeout = TimeSpan.FromMinutes(10);
             });
 
             builder.Services.AddHttpClient("FFMpegApiServiceClient", client =>
@@ -54,6 +55,7 @@ namespace FFMpegUI.Mvc
                     throw new Exception("ApiEndpoint is null");
                 }
                 client.BaseAddress = new Uri(url);
+                client.Timeout = TimeSpan.FromMinutes(10);
             });
 
             builder.Services.AddAutoMapper(
