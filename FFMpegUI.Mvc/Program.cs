@@ -12,6 +12,7 @@ using FFMpegUI.Infrastructure.Support;
 using FFMpegUI.Infrastructure.Resilience;
 using FFMpegUI.Resilience;
 using Microsoft.AspNetCore.Http.Features;
+using FFMpegUI.Mvc.Hubs;
 
 namespace FFMpegUI.Mvc
 {
@@ -109,6 +110,8 @@ namespace FFMpegUI.Mvc
 
             builder.Services.AddRazorPages();
 
+            builder.Services.AddSignalR(); // Add SignalR service
+
             // Configure the maximum request body size before calling UseRouting, UseEndpoints, etc.
             // 1_000_000_000 represents the new size limit in bytes (about 1GB in this example).
             builder.Services.Configure<FormOptions>(options =>
@@ -148,6 +151,8 @@ namespace FFMpegUI.Mvc
             app.UseAuthorization();
 
             app.MapRazorPages();
+
+            app.MapHub<ReportProgressHub>("/reportprogresshub");
 
             Task.Run(async () => {
                 using (var scope = app.Services.CreateScope())

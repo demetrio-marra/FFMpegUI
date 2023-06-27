@@ -48,14 +48,14 @@
                 message = item.ErrorMessage;
             }
 
-            <tr>
+            <tr class="ff-dettaglio-row" data-id="@item.Id">
                 <td><a asp-page-handler="Download" asp-route-id="@item.SourceFileId">@item.SourceFileName</a></td>
                 <td>@(item.SourceFileSize.HasValue ? FileSystemHelper.FormatFileSize(item.SourceFileSize.Value) : "N/A")</td>
                 <td><a asp-page-handler="Download" asp-route-id="@item.ConvertedFileId">@item.ConvertedFileName</a></td>
                 <td>@(item.ConvertedFileSize.HasValue ? FileSystemHelper.FormatFileSize(item.ConvertedFileSize.Value) : "N/A")</td>
                 <td>@(item.StartDate.HasValue ? item.StartDate.Value.ToString("g") : "N/A")</td>
                 <td>@(item.EndDate.HasValue ? item.EndDate.Value.ToString("g") : "N/A")</td>
-                <td>@message</td>
+                <td class="ff-dettaglio-cell-message">@message</td>
             </tr>
         }
     </tbody>
@@ -69,3 +69,35 @@
         </tr>
     </tfoot>
 </table>
+
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.11/signalr.min.js"></script>
+
+    <script>
+    
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/reportprogresshub") // Replace with the URL of your ProgressHub
+        .build();
+
+        connection.on("OnProcessItemMessage", (message) => {
+
+            var id = message.ProcessItemId;
+            var targetTd = $(".ff-dettaglio-row[data-id='" + id + "']").find(".ff-dettaglio-cell-message");
+
+            if (message.ProgressMessage)
+                $(targetTd).text(message.ProgressMessage);
+
+        });
+
+        connection.start()
+        .then(() => {
+            console.log("Connected to ProgressHub");
+        })
+        .catch(error => {
+            console.error("Error connecting to ProgressHub:", error);
+        });
+
+    </script>
+
+}
