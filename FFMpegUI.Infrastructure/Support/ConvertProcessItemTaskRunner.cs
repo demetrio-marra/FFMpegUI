@@ -36,6 +36,16 @@ namespace FFMpegUI.Infrastructure.Support
             using (var scope = _serviceProvider.CreateScope())
             {
                 var convertingService = scope.ServiceProvider.GetRequiredService<IFFMpegConvertingService>();
+                var progressMessagedDispatcher = scope.ServiceProvider.GetRequiredService<IProgressMessagesDispatcher>();
+
+                var startProgressMessage = new FFMpegProcessItemMessage
+                {
+                    ProcessItemId = processItem.ProcessItemId,
+                    StartDate = DateTime.Now,
+                    ProgressMessage = "starting..."
+                };
+
+                await progressMessagedDispatcher.DispatchProcessItemProgress(startProgressMessage);
 
                 var progressMessage = new FFMpegProcessItemMessage
                 {
@@ -61,7 +71,7 @@ namespace FFMpegUI.Infrastructure.Support
                     progressMessage.EndDate = DateTime.Now;
                 }
 
-                var progressMessagedDispatcher = scope.ServiceProvider.GetRequiredService<IProgressMessagesDispatcher>();
+                
                 await progressMessagedDispatcher.DispatchProcessItemProgress(progressMessage);
             }
         }

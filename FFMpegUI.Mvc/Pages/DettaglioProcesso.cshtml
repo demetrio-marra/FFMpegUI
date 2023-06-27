@@ -51,10 +51,10 @@
             <tr class="ff-dettaglio-row" data-id="@item.Id">
                 <td><a asp-page-handler="Download" asp-route-id="@item.SourceFileId">@item.SourceFileName</a></td>
                 <td>@(item.SourceFileSize.HasValue ? FileSystemHelper.FormatFileSize(item.SourceFileSize.Value) : "N/A")</td>
-                <td><a asp-page-handler="Download" asp-route-id="@item.ConvertedFileId">@item.ConvertedFileName</a></td>
-                <td>@(item.ConvertedFileSize.HasValue ? FileSystemHelper.FormatFileSize(item.ConvertedFileSize.Value) : "N/A")</td>
-                <td>@(item.StartDate.HasValue ? item.StartDate.Value.ToString("g") : "N/A")</td>
-                <td>@(item.EndDate.HasValue ? item.EndDate.Value.ToString("g") : "N/A")</td>
+                <td class="ff-dettaglio-cell-fileurl"><a asp-page-handler="Download" asp-route-id="@item.ConvertedFileId">@item.ConvertedFileName</a></td>
+                <td class="ff-dettaglio-cell-filesize">@(item.ConvertedFileSize.HasValue ? FileSystemHelper.FormatFileSize(item.ConvertedFileSize.Value) : "N/A")</td>
+                <td class="ff-dettaglio-cell-startdate">@(item.StartDate.HasValue ? item.StartDate.Value.ToString("g") : "N/A")</td>
+                <td class="ff-dettaglio-cell-enddate">@(item.EndDate.HasValue ? item.EndDate.Value.ToString("g") : "N/A")</td>
                 <td class="ff-dettaglio-cell-message">@message</td>
             </tr>
         }
@@ -77,17 +77,29 @@
     <script>
     
         const connection = new signalR.HubConnectionBuilder()
-            .withUrl("/reportprogresshub") // Replace with the URL of your ProgressHub
+        .withUrl("/reportprogresshub")
         .build();
 
         connection.on("OnProcessItemMessage", (message) => {
 
-            var id = message.ProcessItemId;
-            var targetTd = $(".ff-dettaglio-row[data-id='" + id + "']").find(".ff-dettaglio-cell-message");
+            var id = message.processItemId;
+            var targetTr = $(".ff-dettaglio-row[data-id='" + id + "']");
 
-            if (message.ProgressMessage)
-                $(targetTd).text(message.ProgressMessage);
+            if (message.progressMessage)
+                targetTr.find(".ff-dettaglio-cell-message").text(message.progressMessage);
 
+            if (message.startDate)
+                targetTr.find(".ff-dettaglio-cell-startdate").text(message.startDate);
+
+            if (message.endDate)
+                targetTr.find(".ff-dettaglio-cell-enddate").text(message.endDate);
+
+            if (message.convertedFileSize)
+                targetTr.find(".ff-dettaglio-cell-filesize").text(message.convertedFileSize);
+
+            if (message.convertedFileLink) {
+                targetTr.find(".ff-dettaglio-cell-fileurl").html(message.convertedFileLink);
+            }
         });
 
         connection.start()

@@ -13,6 +13,8 @@ using FFMpegUI.Infrastructure.Resilience;
 using FFMpegUI.Resilience;
 using Microsoft.AspNetCore.Http.Features;
 using FFMpegUI.Mvc.Hubs;
+using FFMpegUI.Infrastructure.Services;
+using FFMpegUI.Mvc.Services;
 
 namespace FFMpegUI.Mvc
 {
@@ -45,7 +47,7 @@ namespace FFMpegUI.Mvc
                     throw new Exception("QFileServerApiUrl is null");
                 }
                 client.BaseAddress = new Uri(url);
-                client.Timeout = TimeSpan.FromMinutes(10);
+                //client.Timeout = TimeSpan.FromMinutes(10);
             });
 
             builder.Services.AddHttpClient("FFMpegApiServiceClient", client =>
@@ -56,7 +58,6 @@ namespace FFMpegUI.Mvc
                     throw new Exception("ApiEndpoint is null");
                 }
                 client.BaseAddress = new Uri(url);
-                client.Timeout = TimeSpan.FromMinutes(10);
             });
 
             builder.Services.AddAutoMapper(
@@ -100,6 +101,7 @@ namespace FFMpegUI.Mvc
             // Register the FFMpegUIServiceConfiguration instance as a singleton
             builder.Services.AddSingleton(ffmpegUIConfig);
 
+            builder.Services.AddScoped<IPresentationUpdater, PresentationUpdater>();
             builder.Services.AddScoped<IQFileServerApiService, QFileServerApiService>();
             builder.Services.AddScoped<IFFMpegUIApiService, FFMpegApiService>();
 
@@ -109,6 +111,7 @@ namespace FFMpegUI.Mvc
             builder.Services.AddScoped<IFFMpegManagementService, FFMpegManagementService>();
 
             builder.Services.AddRazorPages();
+            builder.Services.AddControllers();
 
             builder.Services.AddSignalR(); // Add SignalR service
 
@@ -151,6 +154,8 @@ namespace FFMpegUI.Mvc
             app.UseAuthorization();
 
             app.MapRazorPages();
+
+            app.MapControllers();
 
             app.MapHub<ReportProgressHub>("/reportprogresshub");
 

@@ -55,17 +55,29 @@ namespace FFMpegUI.Services
 
             ConvertFile(sourceFilePath, targetFilePath, parameters, outputLine =>
             {
+                if (outputLine == null)
+                {
+                    return;
+                }
+
                 Match match = ffmpegTimeRegex.Match(outputLine);
                 if (match.Success)
                 {
                     string currentTimeStr = match.Groups[1].Value;
                     TimeSpan currentTime = TimeSpan.Parse(currentTimeStr);
 
+                    double percentange = (currentTime.TotalSeconds / videoDuration.TotalSeconds) * 100;
+
                     var progressMessage = new FFMpegProcessItemMessage
                     {
-                         ProcessItemId = processItemId,
-                         ProgressMessage = $"{currentTime:HH:mm:ss} on {videoDuration:HH:mm:ss}"
+                        ProcessItemId = processItemId,
+                        ProgressMessage = $"{percentange:0.##}% ({currentTime.ToString(@"hh\:mm\:ss")} on {videoDuration.ToString(@"hh\:mm\:ss")})"
                     };
+
+                    if (percentange > 100.0)
+                    {
+                        progressMessage.ProgressMessage = "completing...";
+                    }
 
                     if (emitMessages)
                     {

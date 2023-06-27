@@ -38,7 +38,9 @@ namespace FFMpegUI.Api.Controllers
             return Ok(ret);
         }
 
+        
         [HttpPost]
+        [Route("ConvertEmittingMessages")]
         public async Task<IActionResult> ConvertEmittingMessages(FFMpegConvertItemDTO dto)
         {
             var added = new ConvertProcessItemTaskRunnerItem

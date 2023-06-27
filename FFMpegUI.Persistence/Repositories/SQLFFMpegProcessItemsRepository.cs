@@ -1,4 +1,5 @@
-﻿using FFMpegUI.Persistence.Entities;
+﻿using FFMpegUI.Models;
+using FFMpegUI.Persistence.Entities;
 using FFMpegUI.Resilience;
 using Microsoft.EntityFrameworkCore;
 using Polly;
@@ -10,11 +11,13 @@ namespace FFMpegUI.Persistence.Repositories
         private readonly FFMpegDbContext dbContext;
         private readonly IAsyncPolicy sqlPolicy;
 
+
         public SQLFFMpegProcessItemsRepository(FFMpegDbContext dbContext, IResilientPoliciesLocator policiesLocator) : base(dbContext, policiesLocator) 
         {
             this.dbContext = dbContext;
             sqlPolicy = policiesLocator.GetPolicy(ResilientPolicyType.SqlDatabase);
         }
+
 
         public async Task<IEnumerable<FFMpegPersistedProcessItem>> CreateAsync(IEnumerable<FFMpegPersistedProcessItem> createdProcessItems)
         {
@@ -26,6 +29,53 @@ namespace FFMpegUI.Persistence.Repositories
 
             return createdProcessItems;
         }
+
+
+        async Task IFFMpegProcessItemsRepository.UpdateAsync(FFMpegUpdateProcessItemCommand command)
+        {
+            await sqlPolicy.ExecuteAsync(async () =>
+            {
+                var item = await dbContext.ProcessItems.FindAsync(command.ProcessItemId);
+
+                if (command.Successfull.HasValue)
+                {
+                    item.Successfull = command.Successfull;
+                }
+
+                if (command.StartDate.HasValue)
+                {
+                    item.StartDate = command.StartDate;
+                }
+
+                if (command.EndDate.HasValue)
+                {
+                    item.EndDate = command.EndDate;
+                }
+
+                if (command.ConvertedFileId.HasValue)
+                {
+                    item.ConvertedFileId = command.ConvertedFileId;
+                }
+
+                if (!string.IsNullOrEmpty(command.ConvertedFileName))
+                {
+                    item.ConvertedFileName = command.ConvertedFileName;
+                }
+
+                if (command.ConvertedFileSize.HasValue)
+                {
+                    item.ConvertedFileSize = command.ConvertedFileSize;
+                }
+
+                if (!string.IsNullOrEmpty(command.ErrorMessage))
+                {
+                    item.ErrorMessage = command.ErrorMessage;
+                }
+
+                await dbContext.SaveChangesAsync();
+            });
+        }
+
 
         async Task IFFMpegProcessItemsRepository.UpdateEndInfo(int processItemId, DateTime? endDate, long? convertedFileId, string? convertedFileName, long? convertedFileSize, bool? success, string? errorMessage)
         {
@@ -41,6 +91,7 @@ namespace FFMpegUI.Persistence.Repositories
                 await dbContext.SaveChangesAsync();
             });
         }
+
 
         async Task IFFMpegProcessItemsRepository.UpdateStartInfo(int processItemId, DateTime startDate)
         {
