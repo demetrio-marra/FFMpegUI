@@ -1,4 +1,4 @@
-using FFMpegUI.Persistence.Mapping;
+using FFMpegUI.Infrastructure.Support;
 using FFMpegUI.Services;
 using FFMpegUI.Services.Middlewares;
 using Microsoft.AspNetCore.Http.Features;
@@ -10,6 +10,8 @@ namespace FFMpegUI.Api
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.AddSingleton<ProcessItemBackgroundTaskQueue>();
 
             // Add services to the container.
             builder.Services.AddHttpClient("QFileServerApiServiceClient", client =>
@@ -46,6 +48,8 @@ namespace FFMpegUI.Api
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
+
+            builder.Services.AddHostedService<ConvertProcessItemTaskRunner>();
 
 
             // Set URLs
