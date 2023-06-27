@@ -1,3 +1,4 @@
+using FFMpegUI.Infrastructure;
 using FFMpegUI.Infrastructure.Support;
 using FFMpegUI.Services;
 using FFMpegUI.Services.Middlewares;
@@ -17,13 +18,16 @@ namespace FFMpegUI.Api
             builder.Services.AddHttpClient("QFileServerApiServiceClient", client =>
             {
                 var url = builder.Configuration.GetValue<string>("QFileServerApiUrl");
-                if (url == null)
-                {
-                    throw new Exception("QFileServerApiUrl is null");
-                }
                 client.BaseAddress = new Uri(url);
             });
 
+            builder.Services.AddHttpClient(Constants.FFMpegUIMvcProgressMessagesEndpointClientName, client =>
+            {
+                var url = builder.Configuration.GetValue<string>("FFMpegUIMvcProgressMessagesEndpointUrl");
+                client.BaseAddress = new Uri(url);
+            });
+
+            builder.Services.AddScoped<IProgressMessagesDispatcher, ProgressMessageDispatcher>();
             builder.Services.AddScoped<IQFileServerApiService, QFileServerApiService>();
             builder.Services.AddScoped<IFFMpegConvertingService, FFMpegConversionService>();
 

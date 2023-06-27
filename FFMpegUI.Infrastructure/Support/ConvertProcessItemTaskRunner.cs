@@ -1,4 +1,6 @@
-﻿using FFMpegUI.Services;
+﻿using FFMpegUI.Messages;
+using FFMpegUI.Services;
+using FFMpegUI.Services.Middlewares;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -29,13 +31,38 @@ namespace FFMpegUI.Infrastructure.Support
         }
 
 
-        private async Task ConvertJob(ConvertProcessItemTaskRunnerItem processItemId)
+        private async Task ConvertJob(ConvertProcessItemTaskRunnerItem processItem)
         {
             using (var scope = _serviceProvider.CreateScope())
             {
-                var managementService = scope.ServiceProvider.GetRequiredService<IFFMpegConvertingService>();
-                
-                await managementService.Convert(processItemId.QFileServerFileId, processItemId.ConvertParameters);
+                var convertingService = scope.ServiceProvider.GetRequiredService<IFFMpegConvertingService>();
+
+                var progressMessage = new FFMpegProcessItemMessage
+                {
+                    ProcessItemId = processItem.ProcessItemId
+                };
+
+                try
+                {
+                    var convertedFileDTO = await convertingService.ConvertEmittingMessages(processItem.QFileServerFileId, processItem.ProcessItemId, processItem.ConvertParameters);
+
+                    progressMessage.ConvertedFileId = convertedFileDTO.QFileServerId;
+                    progressMessage.ProgressMessage = "ok";
+                    progressMessage.ConvertedFileName = convertedFileDTO.Filename;
+                    progressMessage.ConvertedFileSize = convertedFileDTO.Filesize;
+                    progressMessage.Successfull = true;
+                } 
+                catch (Exception ex)
+                {
+                    progressMessage.ProgressMessage = "ERROR: " + ex.Message;
+                }
+                finally
+                {
+                    progressMessage.EndDate = DateTime.Now;
+                }
+
+                var progressMessagedDispatcher = scope.ServiceProvider.GetRequiredService<IProgressMessagesDispatcher>();
+                await progressMessagedDispatcher.DispatchProcessItemProgress(progressMessage);
             }
         }
     }
