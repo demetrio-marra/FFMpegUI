@@ -40,6 +40,7 @@ namespace FFMpegUI.Infrastructure.Support
 
                 var startProgressMessage = new FFMpegProcessItemMessage
                 {
+                    ProcessId = processItem.ProcessId,
                     ProcessItemId = processItem.ProcessItemId,
                     StartDate = DateTime.Now,
                     ProgressMessage = "starting..."
@@ -49,6 +50,7 @@ namespace FFMpegUI.Infrastructure.Support
 
                 var progressMessage = new FFMpegProcessItemMessage
                 {
+                    ProcessId = processItem.ProcessId,
                     ProcessItemId = processItem.ProcessItemId
                 };
 
@@ -57,7 +59,7 @@ namespace FFMpegUI.Infrastructure.Support
                     var convertedFileDTO = await convertingService.ConvertEmittingMessages(processItem.QFileServerFileId, processItem.ProcessItemId, processItem.ConvertParameters);
 
                     progressMessage.ConvertedFileId = convertedFileDTO.QFileServerId;
-                    progressMessage.ProgressMessage = "ok";
+                    progressMessage.ProgressMessage = "done";
                     progressMessage.ConvertedFileName = convertedFileDTO.Filename;
                     progressMessage.ConvertedFileSize = convertedFileDTO.Filesize;
                     progressMessage.Successfull = true;
@@ -71,7 +73,6 @@ namespace FFMpegUI.Infrastructure.Support
                 {
                     progressMessage.EndDate = DateTime.Now;
                 }
-
                 
                 await progressMessagedDispatcher.DispatchProcessItemProgress(progressMessage);
             }

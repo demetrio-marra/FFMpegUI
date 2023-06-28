@@ -1,7 +1,6 @@
 ﻿using FFMpegUI.Models;
 using FFMpegUI.Persistence.Entities;
 using FFMpegUI.Resilience;
-using Microsoft.EntityFrameworkCore;
 using Polly;
 
 namespace FFMpegUI.Persistence.Repositories
@@ -31,7 +30,7 @@ namespace FFMpegUI.Persistence.Repositories
         }
 
 
-        async Task IFFMpegProcessItemsRepository.UpdateAsync(FFMpegUpdateProcessItemCommand command)
+        async Task IFFMpegProcessItemsRepository.UpdateProgressInfo(FFMpegUpdateProcessItemCommand command)
         {
             await sqlPolicy.ExecuteAsync(async () =>
             {
@@ -72,22 +71,6 @@ namespace FFMpegUI.Persistence.Repositories
                     item.StatusMessage = command.StatusMessage;
                 }
 
-                await dbContext.SaveChangesAsync();
-            });
-        }
-
-
-        async Task IFFMpegProcessItemsRepository.UpdateEndInfo(int processItemId, DateTime? endDate, long? convertedFileId, string? convertedFileName, long? convertedFileSize, bool? success, string? statusMessage)
-        {
-            await sqlPolicy.ExecuteAsync(async () =>
-            {
-                var item = await dbContext.ProcessItems.FindAsync(processItemId);
-                item.EndDate = endDate;
-                item.ConvertedFileId = convertedFileId;
-                item.ConvertedFileName = convertedFileName;
-                item.Successfull = success;
-                item.StatusMessage = statusMessage;
-                item.ConvertedFileSize = convertedFileSize;
                 await dbContext.SaveChangesAsync();
             });
         }

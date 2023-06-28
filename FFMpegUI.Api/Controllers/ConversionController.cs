@@ -47,7 +47,8 @@ namespace FFMpegUI.Api.Controllers
             {
                 ConvertParameters = dto.Parameters,
                 QFileServerFileId = dto.QFileServerFileId,
-                ProcessItemId = dto.ProcessItemId
+                ProcessItemId = dto.ProcessItemId,
+                ProcessId = dto.ProcessId
             };
 
             taskQueue.Enqueue(added);

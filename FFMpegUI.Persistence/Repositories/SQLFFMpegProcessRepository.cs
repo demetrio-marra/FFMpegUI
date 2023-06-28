@@ -15,6 +15,7 @@ namespace FFMpegUI.Persistence.Repositories
         private readonly IMapper mapper;
         private readonly IAsyncPolicy sqlPolicy;
 
+
         public SQLFFMpegProcessRepository(FFMpegDbContext dbContext,
             IMapper mapper, IResilientPoliciesLocator policiesLocator) : base(dbContext, policiesLocator)
         {
@@ -22,6 +23,7 @@ namespace FFMpegUI.Persistence.Repositories
             this.mapper = mapper;
             sqlPolicy = policiesLocator.GetPolicy(ResilientPolicyType.SqlDatabase);
         }
+
 
         async Task<IPagedList<FFMpegProcessSummary>> IFFMpegProcessRepository.GetAllSummaryAsync(int pageNumber, int pageSize)
         {
@@ -41,6 +43,7 @@ namespace FFMpegUI.Persistence.Repositories
             return ret;
         }
         
+
         async Task<FFMpegPersistedProcess> IFFMpegProcessRepository.GetWithItemsAsync(int processId)
         {
             var ret = await sqlPolicy.ExecuteAsync(async () =>
@@ -57,13 +60,38 @@ namespace FFMpegUI.Persistence.Repositories
             return ret;
         }
 
-        async Task IFFMpegProcessRepository.UpdateConversionCompletedData(int processId, long convertedFilesTotalSize, DateTime? processEndDate)
+
+        async Task IFFMpegProcessRepository.UpdateProgressInfo(FFMpegUpdateProcessCommand updateCommand)
         {
             await sqlPolicy.ExecuteAsync(async () =>
             {
-                var process = await dbContext.Processes.FindAsync(processId);
-                process.ConvertedFilesTotalSize = convertedFilesTotalSize;
-                process.EndDate = processEndDate;
+                var process = await dbContext.Processes.FindAsync(updateCommand.ProcessId);
+               
+                if (updateCommand.Successfull.HasValue)
+                {
+                    process.Successfull = updateCommand.Successfull;
+                }
+
+                if (!string.IsNullOrWhiteSpace(updateCommand.StatusMessage))
+                {
+                    process.StatusMessage = updateCommand.StatusMessage;
+                }
+
+                if (updateCommand.StartDate.HasValue)
+                {
+                    process.StartDate = updateCommand.StartDate.Value;
+                }
+
+                if (updateCommand.EndDate.HasValue)
+                {
+                    process.EndDate = updateCommand.EndDate.Value;
+                }
+
+                if (updateCommand.ConvertedFilesTotalSize.HasValue)
+                {
+                    process.ConvertedFilesTotalSize = updateCommand.ConvertedFilesTotalSize.Value;
+                }
+
                 await dbContext.SaveChangesAsync();
             });
         }

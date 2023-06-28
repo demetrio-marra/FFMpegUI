@@ -2,6 +2,7 @@
 {
     public class FFMpegProcessItemMessage
     {
+        public int ProcessId { get; set; }
         public int ProcessItemId { get; set; }
         public long? ConvertedFileId { get; set; }
         public string? ConvertedFileName { get; set; }

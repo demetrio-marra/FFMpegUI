@@ -38,10 +38,11 @@ namespace FFMpegUI.Services.Middlewares
         }
 
 
-        async Task IFFMpegUIApiService.ConvertEmittingMessages(long qFileServerId, int processItemId, FFMpegConvertParameters parameters)
+        async Task IFFMpegUIApiService.ConvertEmittingMessages(int processId, long qFileServerId, int processItemId, FFMpegConvertParameters parameters)
         {
             var dto = new FFMpegConvertItemDTO
             {
+                ProcessId = processId,
                 Parameters = parameters,
                 QFileServerFileId = qFileServerId,
                 ProcessItemId = processItemId

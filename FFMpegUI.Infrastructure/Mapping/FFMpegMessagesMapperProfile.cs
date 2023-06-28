@@ -8,7 +8,8 @@ namespace FFMpegUI.Infrastructure.Mapping
     {
         public FFMpegMessagesMapperProfile()
         {
-            CreateMap<FFMpegProcessItemMessage, FFMpegUpdateProcessItemCommand>();
+            CreateMap<FFMpegProcessItemMessage, FFMpegUpdateProcessItemCommand>()
+                .ForMember(dest => dest.StatusMessage, opt => opt.MapFrom(src => src.ProgressMessage));
         }
     }
 }

@@ -159,9 +159,6 @@ namespace FFMpegUI.Services
                 VideoCodec = processo.VideoCodec
             };
 
-            long convertedFilesTotalSize = 0;
-            DateTime? processStopDate = null;
-
             foreach (var item in processo.Items)
             {
                 var processItemId = item.Id;
@@ -172,20 +169,14 @@ namespace FFMpegUI.Services
                 {
                     // chiamo il servizio di conversione passandogli l'id del file su QFileServer
                     // Lo stesso servizio caricherà su QFileServer il file convertito e ne restituirà l'id qui
-                    await apiService.ConvertEmittingMessages(sFileId, processItemId, parametriConversione);
+                    await apiService.ConvertEmittingMessages(processId, sFileId, processItemId, parametriConversione);
 
                     // lo stato del processItem e di quello principale sarà aggiornato dall'api progress
                 }
                 catch (Exception ex)
                 {
-                    // in caso di fallimento della chiamata http
-
                     var endDate = DateTime.Now;
-
-                    // aggiorna item
-                    await processItemsRepository.UpdateEndInfo(processItemId, endDate, null, null, null, false, ex.Message);
-                    // aggiorna processo principale
-                    await processRepository.UpdateConversionCompletedData(processId, convertedFilesTotalSize, processStopDate);
+                    await ManageJobSubmissionFailure(processId, processItemId, endDate, ex.Message);
                 }
             }            
         }
@@ -193,14 +184,106 @@ namespace FFMpegUI.Services
 
         async Task IFFMpegManagementService.ElaborateProcessItemProgressMessage(FFMpegProcessItemMessage message)
         {
-            var updateCommand = mapper.Map<FFMpegUpdateProcessItemCommand>(message);
+            var processItemUpdateCommand = mapper.Map<FFMpegUpdateProcessItemCommand>(message);
 
-            await processItemsRepository.UpdateAsync(updateCommand);
+            var tran = await processItemsRepository.BeginTransactionAsync();
 
-            // TODO: check if the entire process database status should change
+            try
+            {
+                await processItemsRepository.UpdateProgressInfo(processItemUpdateCommand);
+
+                // TODO: update process start date
+
+                // check if the whole process status should change
+                if (message.Successfull.HasValue)
+                {
+                    var processId = message.ProcessId;
+
+                    var processUpdateCommand = new FFMpegUpdateProcessCommand
+                    {
+                        ProcessId = processId
+                    };
+
+                    var process = await processRepository.GetWithItemsAsync(processId);
+
+                    if (process.Items.All(i => i.Successfull.HasValue))
+                    {                        
+                        var allSuccess = process.Items.All(i => i.Successfull == true);
+                        var statusMessage = allSuccess ? "done" : "Failed item (" + processItemUpdateCommand.StatusMessage + ")";
+
+                        processUpdateCommand.Successfull = allSuccess;
+                        processUpdateCommand.EndDate = processItemUpdateCommand.EndDate;
+                        processUpdateCommand.StatusMessage = statusMessage;
+                        processUpdateCommand.StartDate = process.Items.Min(i => i.StartDate); // temporaneo
+                    }
+
+                    processUpdateCommand.ConvertedFilesTotalSize = process.Items.Sum(i => i.ConvertedFileSize);
+
+                    await processRepository.UpdateProgressInfo(processUpdateCommand);
+                }
+
+                await processItemsRepository.ConfirmTransactionAsync(tran);
+            } 
+            catch
+            {
+                await processItemsRepository.RejectTransactionAsync(tran);
+            }
 
             // send to browser via SignalR
             await presentationUpdater.UpdateProcessItem(message);
+
+            // TODO: propaga messaggio ad ui (processo)
+        }
+
+
+        private async Task ManageJobSubmissionFailure(int processId, int processItemId, DateTime failureTimestamp, string failureReason)
+        {
+            // aggiorna item
+            var processItemUpdateCommand = new FFMpegUpdateProcessItemCommand
+            {
+                EndDate = failureTimestamp,
+                ProcessItemId = processItemId,
+                Successfull = false,
+                StatusMessage = failureReason
+            };
+
+            var processUpdateCommand = new FFMpegUpdateProcessCommand
+            {
+                EndDate = failureTimestamp,
+                ProcessId = processId,
+                Successfull = false,
+                StatusMessage = failureReason
+            };
+
+            var tranId = await processItemsRepository.BeginTransactionAsync();
+
+            try
+            {
+                await processItemsRepository.UpdateProgressInfo(processItemUpdateCommand);
+
+                // aggiorna processo principale
+                await processRepository.UpdateProgressInfo(processUpdateCommand);
+
+                await processItemsRepository.ConfirmTransactionAsync(tranId);
+            }
+            catch
+            {
+                await processItemsRepository.RejectTransactionAsync(tranId);
+                return;
+            }
+
+            // propaga messaggio ad ui
+            var processItemProgressMessage = new FFMpegProcessItemMessage
+            {
+                EndDate = failureTimestamp,
+                ProcessItemId = processItemId,
+                Successfull = false,
+                ProgressMessage = failureReason
+            };
+
+            await presentationUpdater.UpdateProcessItem(processItemProgressMessage);
+
+            // TODO: propaga messaggio ad ui (processo)
         }
     }
 }
