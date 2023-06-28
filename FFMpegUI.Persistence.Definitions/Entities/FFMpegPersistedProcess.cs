@@ -9,5 +9,7 @@
         public ICollection<FFMpegPersistedProcessItem> Items { get; set; } = new List<FFMpegPersistedProcessItem>();
         public long? SourceFilesTotalSize { get; set; }
         public long? ConvertedFilesTotalSize { get; set; }
+        public bool? Successfull { get; set; }
+        public string? StatusMessage { get; set; }
     }
 }
