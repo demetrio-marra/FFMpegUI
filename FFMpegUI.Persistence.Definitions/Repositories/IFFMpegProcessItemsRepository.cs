@@ -1,4 +1,5 @@
-﻿using FFMpegUI.Persistence.Definitions.Repositories;
+﻿using FFMpegUI.Models;
+using FFMpegUI.Persistence.Definitions.Repositories;
 using FFMpegUI.Persistence.Entities;
 using PagedList.Core;
 
@@ -14,5 +15,7 @@ namespace FFMpegUI.Persistence.Repositories
 
         Task DeleteAsync(int processItemId);
         Task<IEnumerable<FFMpegPersistedProcessItem>> CreateAsync(IEnumerable<FFMpegPersistedProcessItem> createdProcessItems);
+
+        Task UpdateAsync(FFMpegUpdateProcessItemCommand command);
     }
 }

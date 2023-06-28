@@ -46,6 +46,7 @@ services:
       dockerfile: FFMpegUI.Api/Dockerfile
     environment:
       - QFileServerApiUrl=http://qfileserver
+      - FFMpegUIMvcProgressMessagesEndpointUrl=http://ffmpegui.mvc/progress/
 
   ffmpegui.mvc:
     image: ${DOCKER_REGISTRY-}ffmpeguimvc

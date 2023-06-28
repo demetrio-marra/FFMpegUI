@@ -1,20 +1,42 @@
-﻿using FFMpegUI.Models;
+﻿using FFMpegUI.Messages;
+using FFMpegUI.Models;
 using FFMpegUI.Services.Middlewares;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace FFMpegUI.Services
 {
     public class FFMpegConversionService : IFFMpegConvertingService
     {
-        private readonly IQFileServerApiService fileServerApiService;
+        private static readonly Regex ffmpegTimeRegex = new Regex(@"time=(\d{2}:\d{2}:\d{2}\.\d{2})", RegexOptions.Compiled);
 
-        public FFMpegConversionService(IQFileServerApiService fileServerApiService)
+        private readonly IQFileServerApiService fileServerApiService;
+        private readonly IProgressMessagesDispatcher progressMessagesDispatcher;
+
+
+        public FFMpegConversionService(IQFileServerApiService fileServerApiService,
+            IProgressMessagesDispatcher progressMessagesDispatcher)
         {
             this.fileServerApiService = fileServerApiService;
+            this.progressMessagesDispatcher = progressMessagesDispatcher;
         }
 
 
-        async Task<FFMpegConvertedFileDTO> IFFMpegConvertingService.Convert(long qFileServerFileId, FFMpegConvertParameters parameters)
+        async Task<FFMpegConvertedFileDTO> IFFMpegConvertingService.Convert(long qFileServerFileId, int processItemId, FFMpegConvertParameters parameters)
+        {
+            var ret = await Convert(qFileServerFileId, processItemId, parameters, false);
+            return ret;
+        }
+
+
+        async Task<FFMpegConvertedFileDTO> IFFMpegConvertingService.ConvertEmittingMessages(long qFileServerFileId, int processItemId, FFMpegConvertParameters parameters)
+        {
+            var ret = await Convert(qFileServerFileId, processItemId, parameters, true);
+            return ret;
+        }
+
+
+        private async Task<FFMpegConvertedFileDTO> Convert(long qFileServerFileId, int processItemId, FFMpegConvertParameters parameters, bool emitMessages)
         {
             var qSourceFile = await fileServerApiService.DownloadFile(qFileServerFileId);
 
@@ -28,7 +50,41 @@ namespace FFMpegUI.Services
 
             var targetFileName = qSourceFile.FileName + ".mp4";
             var targetFilePath = Path.Combine(tempDir, targetFileName);
-            ConvertFile(sourceFilePath, targetFilePath, parameters);
+
+            var videoDuration = GetVideoDuration(sourceFilePath);
+
+            ConvertFile(sourceFilePath, targetFilePath, parameters, outputLine =>
+            {
+                if (outputLine == null)
+                {
+                    return;
+                }
+
+                Match match = ffmpegTimeRegex.Match(outputLine);
+                if (match.Success)
+                {
+                    string currentTimeStr = match.Groups[1].Value;
+                    TimeSpan currentTime = TimeSpan.Parse(currentTimeStr);
+
+                    double percentange = (currentTime.TotalSeconds / videoDuration.TotalSeconds) * 100;
+
+                    var progressMessage = new FFMpegProcessItemMessage
+                    {
+                        ProcessItemId = processItemId,
+                        ProgressMessage = $"{percentange:0.##}% ({currentTime.ToString(@"hh\:mm\:ss")} on {videoDuration.ToString(@"hh\:mm\:ss")})"
+                    };
+
+                    if (percentange > 100.0)
+                    {
+                        progressMessage.ProgressMessage = "completing...";
+                    }
+
+                    if (emitMessages)
+                    {
+                        progressMessagesDispatcher.DispatchProcessItemProgress(progressMessage);
+                    }
+                }
+            });
 
             // carichiamo su qfileserver            
             long retId = 0;
@@ -51,10 +107,12 @@ namespace FFMpegUI.Services
 
             return ret;
         }
+       
 
-
-        private void ConvertFile(string sourceFilePath, string destFilePath, FFMpegConvertParameters parameters)
+        private void ConvertFile(string sourceFilePath, string destFilePath, FFMpegConvertParameters parameters, Action<string> stdoutCallback)
         {
+            var videoDuration = GetVideoDuration(sourceFilePath);
+
             string ffmpegPath = "ffmpeg"; // Assuming FFmpeg is in the system's PATH environment variable
 
             var vcodec = string.Empty;
@@ -86,17 +144,52 @@ namespace FFMpegUI.Services
             {
                 process.StartInfo = startInfo;
 
-                // Event handlers to capture the process output
-                process.OutputDataReceived += (sender, e) => Console.WriteLine(e.Data);
-                process.ErrorDataReceived += (sender, e) => Console.WriteLine(e.Data);
+                if (stdoutCallback != null)
+                {
+                    process.ErrorDataReceived += (sender, e) => stdoutCallback(e.Data);
+                }
 
                 process.Start();
 
                 // Begin asynchronous read operations on the process output
-                process.BeginOutputReadLine();
                 process.BeginErrorReadLine();
-
                 process.WaitForExit();
+            }
+        }
+
+
+        private TimeSpan GetVideoDuration(string fileFullPath)
+        {
+            var ffmpeg = new Process();
+
+            ffmpeg.StartInfo = new ProcessStartInfo
+            {
+                FileName = "ffmpeg",
+                Arguments = $"-i {fileFullPath}",
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            };
+
+            ffmpeg.Start();
+
+            string output = ffmpeg.StandardError.ReadToEnd();
+            var regex = new Regex(@"Duration: (\d{2}):(\d{2}):(\d{2})");
+            var match = regex.Match(output);
+
+            if (match.Success)
+            {
+                var hours = int.Parse(match.Groups[1].Value);
+                var minutes = int.Parse(match.Groups[2].Value);
+                var seconds = int.Parse(match.Groups[3].Value);
+
+                var duration = new TimeSpan(hours, minutes, seconds);
+
+                return duration;
+            }
+            else
+            {
+                throw new Exception("Could not determine duration");
             }
         }
     }
