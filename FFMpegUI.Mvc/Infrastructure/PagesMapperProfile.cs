@@ -23,10 +23,10 @@ namespace FFMpegUI.Mvc.Infrastructure
             CreateMap<FFMpegProcessItemMessage, ProcessItemProgressViewModel>()
                 .ForMember(dest => dest.ProgressMessage, opt => opt.MapFrom(src => src.ProgressMessage))
                 .ForMember(dest => dest.ProcessItemId, opt => opt.MapFrom(src => src.ProcessItemId.ToString()))
-                .ForMember(dest => dest.ConvertedFileLink, opt => opt.MapFrom(src => src.ConvertedFileId.HasValue ? $"<a href=\"/DettaglioProcesso?id={src.ConvertedFileId}&amp;handler=Download\">{src.ConvertedFileName}</a>" : "N/A"))
-                .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate.HasValue ? src.EndDate.Value.ToString("g") : "N/A"))
-                .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate.HasValue ? src.StartDate.Value.ToString("g") : "N/A"))
-                .ForMember(dest => dest.ConvertedFileSize, opt => opt.MapFrom(src => src.ConvertedFileSize.HasValue ? FileSystemHelper.FormatFileSize(src.ConvertedFileSize.Value) : "N/A"));
+                .ForMember(dest => dest.ConvertedFileLink, opt => opt.MapFrom(src => src.ConvertedFileId.HasValue ? $"<a href=\"/DettaglioProcesso?id={src.ConvertedFileId}&amp;handler=Download\">{src.ConvertedFileName}</a>" : null))
+                .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate.HasValue ? src.EndDate.Value.ToString("g") : null))
+                .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate.HasValue ? src.StartDate.Value.ToString("g") : null))
+                .ForMember(dest => dest.ConvertedFileSize, opt => opt.MapFrom(src => src.ConvertedFileSize.HasValue ? FileSystemHelper.FormatFileSize(src.ConvertedFileSize.Value) : null));
         }
     }
 }
