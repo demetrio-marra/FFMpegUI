@@ -6,6 +6,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>920b9ad6-23f2-4281-bc20-c97f310c8e01</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+    <Authors>Demetrio Marra</Authors>
+    <RepositoryUrl>https://github.com/demetrio-marra/FFMpegUI</RepositoryUrl>
+    <Version></Version>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
