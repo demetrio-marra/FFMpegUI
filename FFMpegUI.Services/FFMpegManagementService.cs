@@ -92,15 +92,12 @@ namespace FFMpegUI.Services
 
                 await processFeaturesRepository.CreateAsync(eProcessFeatures);
 
-                await Task.Run(async () => {
-                    await Task.Delay(1500);
-                    taskQueue.Enqueue(persistedProcessId);
-                });
-
                 eProcess.StartDate = DateTime.Now;
                 await processRepository.UpdateAsync(eProcess);
 
                 await processRepository.ConfirmTransactionAsync(transactionId);
+
+                taskQueue.Enqueue(persistedProcessId); // actually start the conversion process on a background longrunning task
 
                 var ret = await GetProcessAndItems(persistedProcessId);
                 return ret;
