@@ -42,12 +42,6 @@
     <tbody>
         @foreach (var item in Model.ProcessItems)
         {
-            var message = "ok";
-            if (!(item.Successfull ?? false))
-            {
-                message = item.StatusMessage;
-            }
-
             <tr class="ff-dettaglio-row" data-id="@item.Id">
                 <td><a asp-page-handler="Download" asp-route-id="@item.SourceFileId">@item.SourceFileName</a></td>
                 <td>@(item.SourceFileSize.HasValue ? FileSystemHelper.FormatFileSize(item.SourceFileSize.Value) : "N/A")</td>
@@ -55,7 +49,7 @@
                 <td class="ff-dettaglio-cell-filesize">@(item.ConvertedFileSize.HasValue ? FileSystemHelper.FormatFileSize(item.ConvertedFileSize.Value) : "N/A")</td>
                 <td class="ff-dettaglio-cell-startdate">@(item.StartDate.HasValue ? item.StartDate.Value.ToString("g") : "N/A")</td>
                 <td class="ff-dettaglio-cell-enddate">@(item.EndDate.HasValue ? item.EndDate.Value.ToString("g") : "N/A")</td>
-                <td class="ff-dettaglio-cell-message">@message</td>
+                <td class="ff-dettaglio-cell-message">@item.StatusMessage</td>
             </tr>
         }
     </tbody>
