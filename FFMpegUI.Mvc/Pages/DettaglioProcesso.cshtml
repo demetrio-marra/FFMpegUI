@@ -45,7 +45,7 @@
             var message = "ok";
             if (!(item.Successfull ?? false))
             {
-                message = item.ErrorMessage;
+                message = item.StatusMessage;
             }
 
             <tr class="ff-dettaglio-row" data-id="@item.Id">

@@ -12,7 +12,7 @@
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public bool? Successfull { get; set; }
-        public string? ErrorMessage { get; set; }
+        public string? StatusMessage { get; set; }
         public long? SourceFileSize { get; set; }
         public long? ConvertedFileSize { get; set; }
     }

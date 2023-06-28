@@ -67,9 +67,9 @@ namespace FFMpegUI.Persistence.Repositories
                     item.ConvertedFileSize = command.ConvertedFileSize;
                 }
 
-                if (!string.IsNullOrEmpty(command.ErrorMessage))
+                if (!string.IsNullOrEmpty(command.StatusMessage))
                 {
-                    item.ErrorMessage = command.ErrorMessage;
+                    item.StatusMessage = command.StatusMessage;
                 }
 
                 await dbContext.SaveChangesAsync();
@@ -77,7 +77,7 @@ namespace FFMpegUI.Persistence.Repositories
         }
 
 
-        async Task IFFMpegProcessItemsRepository.UpdateEndInfo(int processItemId, DateTime? endDate, long? convertedFileId, string? convertedFileName, long? convertedFileSize, bool? success, string? errorMessage)
+        async Task IFFMpegProcessItemsRepository.UpdateEndInfo(int processItemId, DateTime? endDate, long? convertedFileId, string? convertedFileName, long? convertedFileSize, bool? success, string? statusMessage)
         {
             await sqlPolicy.ExecuteAsync(async () =>
             {
@@ -86,7 +86,7 @@ namespace FFMpegUI.Persistence.Repositories
                 item.ConvertedFileId = convertedFileId;
                 item.ConvertedFileName = convertedFileName;
                 item.Successfull = success;
-                item.ErrorMessage = errorMessage;
+                item.StatusMessage = statusMessage;
                 item.ConvertedFileSize = convertedFileSize;
                 await dbContext.SaveChangesAsync();
             });

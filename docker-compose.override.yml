@@ -4,3 +4,12 @@ services:
   ffmpegui.mvc:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+
+  ffmpeguisql:
+    ports:
+      - 1433:1433
+  
+  ffmpeguinosql:
+    ports:
+      - 8080:8080
+
