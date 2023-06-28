@@ -65,6 +65,7 @@ namespace FFMpegUI.Infrastructure.Support
                 catch (Exception ex)
                 {
                     progressMessage.ProgressMessage = "ERROR: " + ex.Message;
+                    progressMessage.Successfull = false;
                 }
                 finally
                 {
