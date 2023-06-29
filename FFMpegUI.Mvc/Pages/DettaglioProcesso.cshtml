@@ -97,12 +97,12 @@
         });
 
 
-        //connection.on("OnProcessMessage", (message) => {
+        connection.on("OnProcessMessage", (message) => {
 
-        //    if (message.convertedFileSize)
-        //        $(".ff-summary-cell-filesize").text(message.convertedFileSize);
+            if (message.convertedFilesTotalSize)
+                $(".ff-summary-cell-filesize").text(message.convertedFilesTotalSize);
 
-        //});
+        });
 
         connection.start()
         .then(() => {
