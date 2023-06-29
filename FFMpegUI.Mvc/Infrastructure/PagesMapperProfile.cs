@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using FFMpegUI.Messages;
 using FFMpegUI.Models;
 using FFMpegUI.Mvc.Data;
 using FFMpegUI.Mvc.Helpers;
@@ -27,6 +26,13 @@ namespace FFMpegUI.Mvc.Infrastructure
                 .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate.HasValue ? src.EndDate.Value.ToString("g") : null))
                 .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate.HasValue ? src.StartDate.Value.ToString("g") : null))
                 .ForMember(dest => dest.ConvertedFileSize, opt => opt.MapFrom(src => src.ConvertedFileSize.HasValue ? FileSystemHelper.FormatFileSize(src.ConvertedFileSize.Value) : null));
+
+            CreateMap<FFMpegProcessStatusNotification, ProcessProgressViewModel>()
+                .ForMember(dest => dest.ProgressMessage, opt => opt.MapFrom(src => src.ProgressMessage))
+                .ForMember(dest => dest.ProcessId, opt => opt.MapFrom(src => src.ProcessId.ToString()))
+                .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate.HasValue ? src.EndDate.Value.ToString("g") : null))
+                .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate.HasValue ? src.StartDate.Value.ToString("g") : null))
+                .ForMember(dest => dest.ConvertedFilesTotalSize, opt => opt.MapFrom(src => src.ConvertedFilesTotalSize.HasValue ? FileSystemHelper.FormatFileSize(src.ConvertedFilesTotalSize.Value) : null));
         }
     }
 }

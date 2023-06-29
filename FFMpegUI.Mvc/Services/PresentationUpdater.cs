@@ -24,7 +24,8 @@ namespace FFMpegUI.Mvc.Services
 
         async Task IPresentationUpdater.UpdateProcess(FFMpegProcessStatusNotification message)
         {
-            throw new NotImplementedException();
+            var viewModel = mapper.Map<ProcessProgressViewModel>(message);
+            await hubContext.Clients.All.SendAsync("OnProcessMessage", viewModel);
         }
 
 
