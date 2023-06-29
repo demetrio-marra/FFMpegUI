@@ -22,6 +22,11 @@ namespace FFMpegUI.Mvc.Services
             this.mapper = mapper;
         }
 
+        async Task IPresentationUpdater.UpdateProcess(FFMpegProcessStatusNotification message)
+        {
+            throw new NotImplementedException();
+        }
+
 
         async Task IPresentationUpdater.UpdateProcessItem(FFMpegProcessItemStatusNotification message)
         {
