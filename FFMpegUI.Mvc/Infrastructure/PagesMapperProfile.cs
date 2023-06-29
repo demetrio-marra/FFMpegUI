@@ -20,7 +20,7 @@ namespace FFMpegUI.Mvc.Infrastructure
                 .ForMember(dest => dest.FilesCount, opt => opt.MapFrom(src => src.Items.Count()))
                 .ForMember(dest => dest.TotalFilesSize, opt => opt.MapFrom(src => (src.SourceFilesTotalSize ?? 0) + (src.ConvertedFilesTotalSize ?? 0)));
 
-            CreateMap<FFMpegProcessItemMessage, ProcessItemProgressViewModel>()
+            CreateMap<FFMpegProcessItemStatusNotification, ProcessItemProgressViewModel>()
                 .ForMember(dest => dest.ProgressMessage, opt => opt.MapFrom(src => src.ProgressMessage))
                 .ForMember(dest => dest.ProcessItemId, opt => opt.MapFrom(src => src.ProcessItemId.ToString()))
                 .ForMember(dest => dest.ConvertedFileLink, opt => opt.MapFrom(src => src.ConvertedFileId.HasValue ? $"<a href=\"/DettaglioProcesso?id={src.ConvertedFileId}&amp;handler=Download\">{src.ConvertedFileName}</a>" : null))

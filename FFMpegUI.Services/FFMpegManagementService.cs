@@ -230,7 +230,8 @@ namespace FFMpegUI.Services
             }
 
             // send to browser via SignalR
-            await presentationUpdater.UpdateProcessItem(message);
+            var notification = mapper.Map<FFMpegProcessItemStatusNotification>(message);
+            await presentationUpdater.UpdateProcessItem(notification);
 
             // TODO: propaga messaggio ad ui (processo)
         }
@@ -273,7 +274,7 @@ namespace FFMpegUI.Services
             }
 
             // propaga messaggio ad ui
-            var processItemProgressMessage = new FFMpegProcessItemMessage
+            var processItemProgressMessage = new FFMpegProcessItemStatusNotification
             {
                 EndDate = failureTimestamp,
                 ProcessItemId = processItemId,

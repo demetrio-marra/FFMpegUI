@@ -1,9 +1,9 @@
-﻿using FFMpegUI.Messages;
+﻿using FFMpegUI.Models;
 
 namespace FFMpegUI.Infrastructure.Services
 {
     public interface IPresentationUpdater
     {
-        Task UpdateProcessItem(FFMpegProcessItemMessage message);
+        Task UpdateProcessItem(FFMpegProcessItemStatusNotification message);
     }
 }

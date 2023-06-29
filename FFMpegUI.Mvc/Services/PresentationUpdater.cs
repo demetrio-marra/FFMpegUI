@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using FFMpegUI.Infrastructure.Services;
-using FFMpegUI.Messages;
+using FFMpegUI.Models;
 using FFMpegUI.Mvc.Data;
 using FFMpegUI.Mvc.Hubs;
 using Microsoft.AspNetCore.SignalR;
@@ -23,7 +23,7 @@ namespace FFMpegUI.Mvc.Services
         }
 
 
-        async Task IPresentationUpdater.UpdateProcessItem(FFMpegProcessItemMessage message)
+        async Task IPresentationUpdater.UpdateProcessItem(FFMpegProcessItemStatusNotification message)
         {
             var viewModel = mapper.Map<ProcessItemProgressViewModel>(message);
             await hubContext.Clients.All.SendAsync("OnProcessItemMessage", viewModel);
