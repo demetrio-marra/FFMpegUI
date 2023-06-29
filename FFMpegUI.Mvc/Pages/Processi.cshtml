@@ -26,15 +26,15 @@
     <tbody>
         @foreach (var item in Model.Processes)
         {
-            <tr>
+            <tr class="ff-processo-row" data-id="@item.ProcessId">
                 <td><a asp-page="/DettaglioProcesso" asp-route-id="@item.ProcessId">Dettagli</a></td>
                 <td>@(item.ProcessId.HasValue ? item.ProcessId.Value.ToString() : "N/A")</td>
                 <td>@item.SubmissionDate.ToString("g")</td>
-                <td>@(item.StartDate.HasValue ? item.StartDate.Value.ToString("g") : "N/A")</td>
-                <td>@(item.EndDate.HasValue ? item.EndDate.Value.ToString("g") : "N/A")</td>
-                <td>@item.FilesCount</td>
-                <th>@FileSystemHelper.FormatFileSize(item.TotalFilesSize)</th>
-                <th>@item.StatusMessage</th>
+                <td class="ff-processo-cell-startdate">@(item.StartDate.HasValue ? item.StartDate.Value.ToString("g") : "N/A")</td>
+                <td class="ff-processo-cell-enddate">@(item.EndDate.HasValue ? item.EndDate.Value.ToString("g") : "N/A")</td>
+                <td class="ff-processo-cell-filecount">@item.FilesCount</td>
+                <th class="ff-processo-cell-filesize">@FileSystemHelper.FormatFileSize(item.TotalFilesSize)</th>
+                <th class="ff-processo-cell-message">@item.StatusMessage</th>
             </tr>
         }
     </tbody>
@@ -51,3 +51,46 @@
     </ul>
 </nav>
 
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.11/signalr.min.js"></script>
+
+    <script>
+
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/reportprogresshub")
+            .build();
+
+        connection.on("OnProcessMessage", (message) => {
+
+            var id = message.processItemId;
+            var targetTr = $(".ff-processo-row[data-id='" + id + "']");
+
+            if (message.progressMessage)
+                targetTr.find(".ff-processo-cell-message").text(message.progressMessage);
+
+            if (message.startDate)
+                targetTr.find(".ff-processo-cell-startdate").text(message.startDate);
+
+            if (message.endDate)
+                targetTr.find(".ff-processo-cell-enddate").text(message.endDate);
+
+            if (message.allFilesTotalSize)
+                targetTr.find(".ff-processo-cell-filesize").text(message.allFilesTotalSize);
+
+            if (message.allFilesTotalCount)
+                targetTr.find(".ff-processo-cell-filecount").text(message.allFilesTotalCount);
+
+        });
+
+        connection.start()
+            .then(() => {
+                console.log("Connected to ProgressHub");
+            })
+            .catch(error => {
+                console.error("Error connecting to ProgressHub:", error);
+            });
+
+    </script>
+
+}
