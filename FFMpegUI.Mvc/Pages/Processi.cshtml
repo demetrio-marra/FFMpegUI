@@ -20,6 +20,7 @@
             <th scope="col">End Date</th>
             <th scope="col">Files Count</th>
             <th scope="col">Total size</th>
+            <th scope="col">Status</th>
         </tr>
     </thead>
     <tbody>
@@ -33,6 +34,7 @@
                 <td>@(item.EndDate.HasValue ? item.EndDate.Value.ToString("g") : "N/A")</td>
                 <td>@item.FilesCount</td>
                 <th>@FileSystemHelper.FormatFileSize(item.TotalFilesSize)</th>
+                <th>@item.StatusMessage</th>
             </tr>
         }
     </tbody>

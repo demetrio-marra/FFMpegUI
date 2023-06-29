@@ -8,5 +8,6 @@
         public DateTime? EndDate { get; set; }
         public int FilesCount { get; set; }
         public long TotalFilesSize { get; set; }
+        public string? StatusMessage { get; set; }
     }
 }

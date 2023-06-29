@@ -4,6 +4,7 @@ using FFMpegUI.Mvc.Data;
 using FFMpegUI.Mvc.Helpers;
 using FFMpegUI.Mvc.Pages;
 using FFMpegUI.Persistence.Entities;
+using Microsoft.AspNetCore.Routing.Constraints;
 
 namespace FFMpegUI.Mvc.Infrastructure
 {
@@ -17,7 +18,8 @@ namespace FFMpegUI.Mvc.Infrastructure
             CreateMap<FFMpegPersistedProcess, FFMpegProcessSummary>()
                 .ForMember(dest => dest.ProcessId, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.FilesCount, opt => opt.MapFrom(src => src.Items.Count()))
-                .ForMember(dest => dest.TotalFilesSize, opt => opt.MapFrom(src => (src.SourceFilesTotalSize ?? 0) + (src.ConvertedFilesTotalSize ?? 0)));
+                .ForMember(dest => dest.TotalFilesSize, opt => opt.MapFrom(src => (src.SourceFilesTotalSize ?? 0) + (src.ConvertedFilesTotalSize ?? 0)))
+                .ForMember(dest => dest.StatusMessage, opt => opt.MapFrom(src => src.StatusMessage));
 
             CreateMap<FFMpegProcessItemStatusNotification, ProcessItemProgressViewModel>()
                 .ForMember(dest => dest.ProgressMessage, opt => opt.MapFrom(src => src.ProgressMessage))
