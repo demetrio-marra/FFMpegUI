@@ -186,6 +186,8 @@ namespace FFMpegUI.Services
         {
             var processItemUpdateCommand = mapper.Map<FFMpegUpdateProcessItemCommand>(message);
 
+            FFMpegProcessStatusNotification processStatusNotification = null;
+
             var tran = await processItemsRepository.BeginTransactionAsync();
 
             try
@@ -220,6 +222,7 @@ namespace FFMpegUI.Services
                     processUpdateCommand.ConvertedFilesTotalSize = process.Items.Sum(i => i.ConvertedFileSize);
 
                     await processRepository.UpdateProgressInfo(processUpdateCommand);
+                    processStatusNotification = mapper.Map<FFMpegProcessStatusNotification>(processUpdateCommand);
                 }
 
                 await processItemsRepository.ConfirmTransactionAsync(tran);
@@ -230,10 +233,13 @@ namespace FFMpegUI.Services
             }
 
             // send to browser via SignalR
-            var notification = mapper.Map<FFMpegProcessItemStatusNotification>(message);
-            await presentationUpdater.UpdateProcessItem(notification);
+            var processItemStatusNotification = mapper.Map<FFMpegProcessItemStatusNotification>(processItemUpdateCommand);
+            await presentationUpdater.UpdateProcessItem(processItemStatusNotification);
 
-            // TODO: propaga messaggio ad ui (processo)
+            if (processStatusNotification != null)
+            {
+                await presentationUpdater.UpdateProcess(processStatusNotification);
+            }
         }
 
 
@@ -273,18 +279,11 @@ namespace FFMpegUI.Services
                 return;
             }
 
-            // propaga messaggio ad ui
-            var processItemProgressMessage = new FFMpegProcessItemStatusNotification
-            {
-                EndDate = failureTimestamp,
-                ProcessItemId = processItemId,
-                Successfull = false,
-                ProgressMessage = failureReason
-            };
+            var processItemStatusNotification = mapper.Map<FFMpegProcessItemStatusNotification>(processItemUpdateCommand);
+            var processStatusNotification = mapper.Map<FFMpegProcessStatusNotification>(processUpdateCommand);
 
-            await presentationUpdater.UpdateProcessItem(processItemProgressMessage);
-
-            // TODO: propaga messaggio ad ui (processo)
+            await presentationUpdater.UpdateProcessItem(processItemStatusNotification);
+            await presentationUpdater.UpdateProcess(processStatusNotification);
         }
     }
 }

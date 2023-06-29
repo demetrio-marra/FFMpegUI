@@ -11,7 +11,7 @@ namespace FFMpegUI.Infrastructure.Mapping
             CreateMap<FFMpegProcessItemMessage, FFMpegUpdateProcessItemCommand>()
                 .ForMember(dest => dest.StatusMessage, opt => opt.MapFrom(src => src.ProgressMessage));
 
-            CreateMap<FFMpegProcessItemMessage, FFMpegProcessItemStatusNotification>();
+          
         }
     }
 }
