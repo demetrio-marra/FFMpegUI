@@ -34,7 +34,6 @@ namespace FFMpegUI.Mvc.Infrastructure
                 .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate.HasValue ? src.EndDate.Value.ToString("g") : null))
                 .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate.HasValue ? src.StartDate.Value.ToString("g") : null))
                 .ForMember(dest => dest.ConvertedFilesTotalSize, opt => opt.MapFrom(src => src.ConvertedFilesTotalSize.HasValue ? FileSystemHelper.FormatFileSize(src.ConvertedFilesTotalSize.Value) : null))
-                .ForMember(dest => dest.AllFilesCount, opt => opt.MapFrom(src => src.AllFilesCount))
                 .ForMember(dest => dest.AllFilesTotalSize, opt => opt.MapFrom(src => src.AllFilesTotalSize.HasValue ? FileSystemHelper.FormatFileSize(src.AllFilesTotalSize.Value) : null));
         }
     }

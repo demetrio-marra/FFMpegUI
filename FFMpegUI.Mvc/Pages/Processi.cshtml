@@ -18,7 +18,7 @@
             <th scope="col">Created</th>
             <th scope="col">Start Date</th>
             <th scope="col">End Date</th>
-            <th scope="col">Files Count</th>
+            <th scope="col">Items count</th>
             <th scope="col">Total size</th>
             <th scope="col">Status</th>
         </tr>
@@ -32,7 +32,7 @@
                 <td>@item.SubmissionDate.ToString("g")</td>
                 <td class="ff-processo-cell-startdate">@(item.StartDate.HasValue ? item.StartDate.Value.ToString("g") : "N/A")</td>
                 <td class="ff-processo-cell-enddate">@(item.EndDate.HasValue ? item.EndDate.Value.ToString("g") : "N/A")</td>
-                <td class="ff-processo-cell-filecount">@item.FilesCount</td>
+                <td>@item.FilesCount</td>
                 <th class="ff-processo-cell-filesize">@FileSystemHelper.FormatFileSize(item.TotalFilesSize)</th>
                 <th class="ff-processo-cell-message">@item.StatusMessage</th>
             </tr>
@@ -77,10 +77,6 @@
 
             if (message.allFilesTotalSize)
                 targetTr.find(".ff-processo-cell-filesize").text(message.allFilesTotalSize);
-
-            if (message.allFilesTotalCount)
-                targetTr.find(".ff-processo-cell-filecount").text(message.allFilesTotalCount);
-
         });
 
         connection.start()

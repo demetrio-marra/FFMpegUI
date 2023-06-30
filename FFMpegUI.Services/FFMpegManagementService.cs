@@ -225,7 +225,6 @@ namespace FFMpegUI.Services
                     await processRepository.UpdateProgressInfo(processUpdateCommand);
                     processStatusNotification = mapper.Map<FFMpegProcessStatusNotification>(processUpdateCommand);
 
-                    processStatusNotification.AllFilesCount = process.Items.Count;
                     processStatusNotification.AllFilesTotalSize = process.Items.Sum(i => (i.ConvertedFileSize ?? 0) + i.SourceFileSize);
                 }
 

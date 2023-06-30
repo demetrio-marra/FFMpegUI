@@ -9,6 +9,5 @@
         public long? ConvertedFilesTotalSize { get; set; }
         public string? ProgressMessage { get; set; }
         public long? AllFilesTotalSize { get; set; }
-        public int? AllFilesCount { get; set; }
     }
 }

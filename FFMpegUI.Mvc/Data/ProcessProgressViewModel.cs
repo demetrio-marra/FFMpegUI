@@ -8,7 +8,6 @@
         public bool? Successfull { get; set; }
         public long? ConvertedFilesTotalSize { get; set; }
         public int? AllFilesTotalSize { get; set; }
-        public int? AllFilesCount { get; set; } = 0;
         public string? ProgressMessage { get; set; }
     }
 }
