@@ -22,21 +22,21 @@ namespace FFMpegUI.Services
         }
 
 
-        async Task<FFMpegConvertedFileDTO> IFFMpegConvertingService.Convert(long qFileServerFileId, int processItemId, FFMpegConvertParameters parameters)
+        async Task<FFMpegConvertedFileDTO> IFFMpegConvertingService.Convert(long qFileServerFileId, int processItemId, int processId, FFMpegConvertParameters parameters)
         {
-            var ret = await Convert(qFileServerFileId, processItemId, parameters, false);
+            var ret = await Convert(qFileServerFileId, processItemId, processId, parameters, false);
             return ret;
         }
 
 
-        async Task<FFMpegConvertedFileDTO> IFFMpegConvertingService.ConvertEmittingMessages(long qFileServerFileId, int processItemId, FFMpegConvertParameters parameters)
+        async Task<FFMpegConvertedFileDTO> IFFMpegConvertingService.ConvertEmittingMessages(long qFileServerFileId, int processItemId, int processId, FFMpegConvertParameters parameters)
         {
-            var ret = await Convert(qFileServerFileId, processItemId, parameters, true);
+            var ret = await Convert(qFileServerFileId, processItemId, processId, parameters, true);
             return ret;
         }
 
 
-        private async Task<FFMpegConvertedFileDTO> Convert(long qFileServerFileId, int processItemId, FFMpegConvertParameters parameters, bool emitMessages)
+        private async Task<FFMpegConvertedFileDTO> Convert(long qFileServerFileId, int processItemId, int processId, FFMpegConvertParameters parameters, bool emitMessages)
         {
             var qSourceFile = await fileServerApiService.DownloadFile(qFileServerFileId);
 
@@ -71,7 +71,8 @@ namespace FFMpegUI.Services
                     var progressMessage = new FFMpegProcessItemMessage
                     {
                         ProcessItemId = processItemId,
-                        ProgressMessage = $"{percentange:0.##}% ({currentTime.ToString(@"hh\:mm\:ss")} on {videoDuration.ToString(@"hh\:mm\:ss")})"
+                        ProgressMessage = $"{percentange:0.##}% ({currentTime.ToString(@"hh\:mm\:ss")} on {videoDuration.ToString(@"hh\:mm\:ss")})",
+                        ProcessId = processId
                     };
 
                     if (percentange > 100.0)

@@ -79,6 +79,9 @@
             var id = message.processItemId;
             var targetTr = $(".ff-dettaglio-row[data-id='" + id + "']");
 
+            if (!targetTr)
+                return;
+
             if (message.progressMessage)
                 targetTr.find(".ff-dettaglio-cell-message").text(message.progressMessage);
 

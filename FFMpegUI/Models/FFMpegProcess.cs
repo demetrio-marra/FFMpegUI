@@ -13,5 +13,7 @@
         public int? RescaleHorizontalWidth { get; set; }
         public long? SourceFilesTotalSize { get; set; }
         public long? ConvertedFilesTotalSize { get; set; }
+        public bool? Successfull { get; set; }
+        public string? StatusMessage { get; set; }
     }
 }

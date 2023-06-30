@@ -56,7 +56,7 @@ namespace FFMpegUI.Infrastructure.Support
 
                 try
                 {
-                    var convertedFileDTO = await convertingService.ConvertEmittingMessages(processItem.QFileServerFileId, processItem.ProcessItemId, processItem.ConvertParameters);
+                    var convertedFileDTO = await convertingService.ConvertEmittingMessages(processItem.QFileServerFileId, processItem.ProcessItemId, processItem.ProcessId, processItem.ConvertParameters);
 
                     progressMessage.ConvertedFileId = convertedFileDTO.QFileServerId;
                     progressMessage.ProgressMessage = "done";

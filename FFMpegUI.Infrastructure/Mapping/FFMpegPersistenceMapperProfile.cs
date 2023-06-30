@@ -37,7 +37,9 @@ namespace FFMpegUI.Persistence.Mapping
                 .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate))
                 .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate))
                 .ForMember(dest => dest.SourceFilesTotalSize, opt => opt.MapFrom(src => src.SourceFilesTotalSize))
-                .ForMember(dest => dest.ConvertedFilesTotalSize, opt => opt.MapFrom(src => src.ConvertedFilesTotalSize));
+                .ForMember(dest => dest.ConvertedFilesTotalSize, opt => opt.MapFrom(src => src.ConvertedFilesTotalSize))
+                .ForMember(dest => dest.Successfull, opt => opt.MapFrom(src => src.Successfull))
+                .ForMember(dest => dest.StatusMessage, opt => opt.MapFrom(src => src.StatusMessage));
         }
     }
 }

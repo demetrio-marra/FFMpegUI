@@ -11,15 +11,18 @@ namespace FFMpegUI.Mvc.Services
     {
         private readonly IHubContext<ReportProgressHub> hubContext;
         private readonly IMapper mapper;
+        private readonly ILogger<PresentationUpdater> logger;
 
 
         public PresentationUpdater(
             IHubContext<ReportProgressHub> hubContext,
-            IMapper mapper
+            IMapper mapper,
+            ILogger<PresentationUpdater> logger
             )
         {
             this.hubContext = hubContext;
             this.mapper = mapper;
+            this.logger = logger;
         }
 
         async Task IPresentationUpdater.UpdateProcess(FFMpegProcessStatusNotification message)

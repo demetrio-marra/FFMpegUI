@@ -135,6 +135,8 @@ namespace FFMpegUI.Mvc
             // Set URLs
             builder.WebHost.UseUrls("http://*:80");
 
+            builder.Logging.AddConsole();
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.

@@ -63,8 +63,12 @@
 
         connection.on("OnProcessMessage", (message) => {
 
-            var id = message.processItemId;
+            var id = message.processId;
+
             var targetTr = $(".ff-processo-row[data-id='" + id + "']");
+
+            if (!targetTr)
+                return;
 
             if (message.progressMessage)
                 targetTr.find(".ff-processo-cell-message").text(message.progressMessage);

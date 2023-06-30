@@ -6,6 +6,7 @@ using FFMpegUI.Models;
 using FFMpegUI.Persistence.Entities;
 using FFMpegUI.Persistence.Repositories;
 using FFMpegUI.Services.Middlewares;
+using Microsoft.Extensions.Logging;
 using PagedList.Core;
 
 namespace FFMpegUI.Services
@@ -20,7 +21,7 @@ namespace FFMpegUI.Services
         private readonly IFFMpegUIApiService apiService;
         private readonly BackgroundTaskQueue taskQueue;
         private readonly IPresentationUpdater presentationUpdater;
-
+        private readonly ILogger<FFMpegManagementService> logger;
 
         public FFMpegManagementService(IMapper mapper,
             IFFMpegProcessFeaturesRepository processFeaturesRepository,
@@ -29,7 +30,8 @@ namespace FFMpegUI.Services
             IQFileServerApiService qFileServerApiService,
             IFFMpegUIApiService apiService,
             BackgroundTaskQueue taskQueue,
-            IPresentationUpdater presentationUpdater
+            IPresentationUpdater presentationUpdater,
+            ILogger<FFMpegManagementService> logger
             )
         {
             this.mapper = mapper;
@@ -40,6 +42,7 @@ namespace FFMpegUI.Services
             this.apiService = apiService;
             this.taskQueue = taskQueue;
             this.presentationUpdater = presentationUpdater;
+            this.logger = logger;
         }
 
 
@@ -186,6 +189,7 @@ namespace FFMpegUI.Services
         {
             var processItemUpdateCommand = mapper.Map<FFMpegUpdateProcessItemCommand>(message);
 
+            var processId = message.ProcessId;
             var mainProcessUpdatedToo = false;
 
             var tran = await processItemsRepository.BeginTransactionAsync();
@@ -199,8 +203,6 @@ namespace FFMpegUI.Services
                 // check if the whole process status should change
                 if (message.Successfull.HasValue)
                 {
-                    var processId = message.ProcessId;
-
                     var processUpdateCommand = new FFMpegUpdateProcessCommand
                     {
                         ProcessId = processId
@@ -237,7 +239,17 @@ namespace FFMpegUI.Services
 
             if (mainProcessUpdatedToo)
             {
-                await DispatchProcessStatusNotification(message.ProcessId);
+                await DispatchProcessStatusNotification(processId);
+            }
+            else
+            {
+                // update just the message on the process without accessing db
+                var processStatusNotification = new FFMpegProcessStatusNotification
+                {
+                    ProcessId = processId,
+                    ProgressMessage = "running" // as generic as possible
+                };
+                await presentationUpdater.UpdateProcess(processStatusNotification);
             }
         }
 

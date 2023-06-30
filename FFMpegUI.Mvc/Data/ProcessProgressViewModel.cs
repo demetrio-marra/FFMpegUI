@@ -2,12 +2,11 @@
 {
     public class ProcessProgressViewModel
     {
-        public int ProcessId { get; set; }
-        public DateTime? StartDate { get; set; }
-        public DateTime? EndDate { get; set; }
-        public bool? Successfull { get; set; }
-        public long? ConvertedFilesTotalSize { get; set; }
-        public int? AllFilesTotalSize { get; set; }
+        public string? ProcessId { get; set; }
+        public string? StartDate { get; set; }
+        public string? EndDate { get; set; }
+        public string? ConvertedFilesTotalSize { get; set; }
+        public string? AllFilesTotalSize { get; set; }
         public string? ProgressMessage { get; set; }
     }
 }

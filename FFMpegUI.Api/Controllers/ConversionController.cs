@@ -31,9 +31,10 @@ namespace FFMpegUI.Api.Controllers
 
 
         [HttpPost]
+        [Obsolete("Use ConvertEmittingMessages", false)]
         public async Task<IActionResult> Index(FFMpegConvertItemDTO dto)
         {
-            var convertedFile = await service.Convert(dto.QFileServerFileId, dto.ProcessItemId, dto.Parameters);
+            var convertedFile = await service.Convert(dto.QFileServerFileId, dto.ProcessItemId, dto.ProcessId, dto.Parameters);
             var ret = JsonSerializer.Serialize(convertedFile);
             return Ok(ret);
         }

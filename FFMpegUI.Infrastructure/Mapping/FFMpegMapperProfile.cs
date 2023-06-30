@@ -14,8 +14,8 @@ namespace FFMpegUI.Persistence.Mapping
                 .ForMember(dest => dest.ProcessItemId, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.ProgressMessage, opt => opt.MapFrom(src => src.StatusMessage));
 
-            CreateMap<FFMpegUpdateProcessCommand, FFMpegProcessStatusNotification>()
-                .ForMember(dest => dest.AllFilesTotalSize, opt => opt.Ignore())
+            CreateMap<FFMpegProcess, FFMpegProcessStatusNotification>()
+                .ForMember(dest => dest.AllFilesTotalSize, opt => opt.MapFrom(src => (src.ConvertedFilesTotalSize ?? 0) + src.SourceFilesTotalSize))
                 .ForMember(dest => dest.ProgressMessage, opt => opt.MapFrom(src => src.StatusMessage));
         }
     }
