@@ -10,9 +10,9 @@ namespace FFMpegUI.Persistence.Mapping
     {
         public FFMpegMapperProfile()
         {
-            CreateMap<FFMpegUpdateProcessItemCommand, FFMpegProcessItemStatusNotification>()
-                .ForMember(dest => dest.ProgressMessage, opt => opt.MapFrom(src => src.StatusMessage))
-                .ForMember(dest => dest.ProcessId, opt => opt.Ignore());
+            CreateMap<FFMpegProcessItem, FFMpegProcessItemStatusNotification>()
+                .ForMember(dest => dest.ProcessItemId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.ProgressMessage, opt => opt.MapFrom(src => src.StatusMessage));
 
             CreateMap<FFMpegUpdateProcessCommand, FFMpegProcessStatusNotification>()
                 .ForMember(dest => dest.AllFilesTotalSize, opt => opt.Ignore())

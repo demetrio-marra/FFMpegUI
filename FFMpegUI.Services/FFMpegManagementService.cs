@@ -7,7 +7,6 @@ using FFMpegUI.Persistence.Entities;
 using FFMpegUI.Persistence.Repositories;
 using FFMpegUI.Services.Middlewares;
 using PagedList.Core;
-using System.Diagnostics;
 
 namespace FFMpegUI.Services
 {
@@ -187,7 +186,7 @@ namespace FFMpegUI.Services
         {
             var processItemUpdateCommand = mapper.Map<FFMpegUpdateProcessItemCommand>(message);
 
-            FFMpegProcessStatusNotification processStatusNotification = null;
+            var mainProcessUpdatedToo = false;
 
             var tran = await processItemsRepository.BeginTransactionAsync();
 
@@ -223,9 +222,7 @@ namespace FFMpegUI.Services
                     processUpdateCommand.ConvertedFilesTotalSize = process.Items.Sum(i => i.ConvertedFileSize);
 
                     await processRepository.UpdateProgressInfo(processUpdateCommand);
-                    processStatusNotification = mapper.Map<FFMpegProcessStatusNotification>(processUpdateCommand);
-
-                    processStatusNotification.AllFilesTotalSize = process.Items.Sum(i => (i.ConvertedFileSize ?? 0) + i.SourceFileSize);
+                    mainProcessUpdatedToo = true;
                 }
 
                 await processItemsRepository.ConfirmTransactionAsync(tran);
@@ -236,13 +233,38 @@ namespace FFMpegUI.Services
             }
 
             // send to browser via SignalR
-            var processItemStatusNotification = mapper.Map<FFMpegProcessItemStatusNotification>(processItemUpdateCommand);
-            await presentationUpdater.UpdateProcessItem(processItemStatusNotification);
+            await DispatchProcessItemStatusNotification(message.ProcessItemId);
 
-            if (processStatusNotification != null)
+            if (mainProcessUpdatedToo)
             {
-                await presentationUpdater.UpdateProcess(processStatusNotification);
+                await DispatchProcessStatusNotification(message.ProcessId);
             }
+        }
+
+
+        private async Task DispatchProcessItemStatusNotification(int processItemId)
+        {
+            var processItem = await GetProcessItemAsync(processItemId);
+            if (processItem == null)
+            {
+                return;
+            }
+
+            var processItemStatusNotification = mapper.Map<FFMpegProcessItemStatusNotification>(processItem);
+            await presentationUpdater.UpdateProcessItem(processItemStatusNotification);
+        }
+
+
+        private async Task DispatchProcessStatusNotification(int processId)
+        {
+            var process = await GetProcessAsync(processId);
+            if (process == null)
+            {
+                return;
+            }
+
+            var processStatusNotification = mapper.Map<FFMpegProcessStatusNotification>(process);
+            await presentationUpdater.UpdateProcess(processStatusNotification);
         }
 
 
@@ -282,11 +304,23 @@ namespace FFMpegUI.Services
                 return;
             }
 
-            var processItemStatusNotification = mapper.Map<FFMpegProcessItemStatusNotification>(processItemUpdateCommand);
-            var processStatusNotification = mapper.Map<FFMpegProcessStatusNotification>(processUpdateCommand);
+            await DispatchProcessItemStatusNotification(processItemId);
+            await DispatchProcessStatusNotification(processId);
+        }
 
-            await presentationUpdater.UpdateProcessItem(processItemStatusNotification);
-            await presentationUpdater.UpdateProcess(processStatusNotification);
+
+        private async Task<FFMpegProcessItem> GetProcessItemAsync(int processItemId)
+        {
+            var entity = await processItemsRepository.GetAsync(processItemId);
+            var ret = mapper.Map<FFMpegProcessItem>(entity);
+            return ret;
+        }
+
+        private async Task<FFMpegProcess> GetProcessAsync(int processId)
+        {
+            var entity = await processRepository.GetAsync(processId);
+            var ret = mapper.Map<FFMpegProcess>(entity);
+            return ret;
         }
     }
 }

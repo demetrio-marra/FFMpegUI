@@ -30,6 +30,14 @@ namespace FFMpegUI.Persistence.Mapping
                    ConvertedFilesTotalSize = src.Item1.ConvertedFilesTotalSize,
                    SourceFilesTotalSize = src.Item1.SourceFilesTotalSize
                });
+
+            // used just for the status notification creation
+            CreateMap<FFMpegPersistedProcess, FFMpegProcess>()
+                .ForMember(dest => dest.ProcessId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate))
+                .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate))
+                .ForMember(dest => dest.SourceFilesTotalSize, opt => opt.MapFrom(src => src.SourceFilesTotalSize))
+                .ForMember(dest => dest.ConvertedFilesTotalSize, opt => opt.MapFrom(src => src.ConvertedFilesTotalSize));
         }
     }
 }
