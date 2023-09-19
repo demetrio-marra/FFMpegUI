@@ -1,7 +1,5 @@
-using FFMpegUI.Services;
 using Microsoft.AspNetCore.Mvc;
 using FFMpegUI.Infrastructure.DTOs;
-using System.Text.Json;
 using FFMpegUI.Infrastructure.Support;
 
 namespace FFMpegUI.Api.Controllers
@@ -11,14 +9,12 @@ namespace FFMpegUI.Api.Controllers
     public class ConversionController : ControllerBase
     {       
         private readonly ILogger<ConversionController> _logger;
-        private readonly IFFMpegConvertingService service;
         private readonly ProcessItemBackgroundTaskQueue taskQueue;
 
 
-        public ConversionController(ILogger<ConversionController> logger, IFFMpegConvertingService service, ProcessItemBackgroundTaskQueue taskQueue)
+        public ConversionController(ILogger<ConversionController> logger, ProcessItemBackgroundTaskQueue taskQueue)
         {
             _logger = logger;
-            this.service = service;
             this.taskQueue = taskQueue;
         }
 
@@ -27,16 +23,6 @@ namespace FFMpegUI.Api.Controllers
         public IActionResult Index()
         {
             return Ok();
-        }
-
-
-        [HttpPost]
-        [Obsolete("Use ConvertEmittingMessages", false)]
-        public async Task<IActionResult> Index(FFMpegConvertItemDTO dto)
-        {
-            var convertedFile = await service.Convert(dto.QFileServerFileId, dto.ProcessItemId, dto.ProcessId, dto.Parameters);
-            var ret = JsonSerializer.Serialize(convertedFile);
-            return Ok(ret);
         }
 
         

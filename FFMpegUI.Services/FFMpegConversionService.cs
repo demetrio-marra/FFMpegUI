@@ -22,13 +22,6 @@ namespace FFMpegUI.Services
         }
 
 
-        async Task<FFMpegConvertedFileDTO> IFFMpegConvertingService.Convert(long qFileServerFileId, int processItemId, int processId, FFMpegConvertParameters parameters)
-        {
-            var ret = await Convert(qFileServerFileId, processItemId, processId, parameters, false);
-            return ret;
-        }
-
-
         async Task<FFMpegConvertedFileDTO> IFFMpegConvertingService.ConvertEmittingMessages(long qFileServerFileId, int processItemId, int processId, FFMpegConvertParameters parameters)
         {
             var ret = await Convert(qFileServerFileId, processItemId, processId, parameters, true);
