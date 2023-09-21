@@ -21,6 +21,15 @@ namespace FFMpegUI.Services.Middlewares
             httpClient = clientFactory.CreateClient("QFileServerApiServiceClient");
         }
 
+        public async Task<QFileServerDTO?> GetFileMetadata(long id)
+        {
+            var uriString = API_PATH + "/" + id.ToString();
+            var response = await httpClient.GetAsync(new Uri(uriString, UriKind.Relative));
+            response.EnsureSuccessStatusCode();
+            var ret = await JsonSerializer.DeserializeAsync<QFileServerDTO>(await response.Content.ReadAsStreamAsync());
+            return ret;
+        }
+
         public async Task<ODataQFileServerDTO?> ODataGetFiles(string oDataQueryString)
         {
             var uriString = ODATA_PATH + "?" + oDataQueryString;
@@ -105,5 +114,7 @@ namespace FFMpegUI.Services.Middlewares
 
             return ret;
         }
+
+      
     }
 }

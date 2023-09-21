@@ -12,5 +12,6 @@ namespace FFMpegUI.Services.Middlewares
         Task<ODataQFileServerDTO?> ODataGetFiles(string oDataQueryString);
         Task<QFileServerDTO?> UploadFile(Stream openedStream, string fileName);
         Task<QFileServerDTO?> UploadFile(IFormFile formFile);
+        Task<QFileServerDTO?> GetFileMetadata(long id);
     }
 }
