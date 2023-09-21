@@ -26,7 +26,8 @@ namespace FFMpegUI.Services.Middlewares
             var uriString = API_PATH + "/" + id.ToString();
             var response = await httpClient.GetAsync(new Uri(uriString, UriKind.Relative));
             response.EnsureSuccessStatusCode();
-            var ret = await JsonSerializer.DeserializeAsync<QFileServerDTO>(await response.Content.ReadAsStreamAsync());
+            var ret = await JsonSerializer.DeserializeAsync<QFileServerDTO>(await response.Content.ReadAsStreamAsync(),
+                jsonSerializerOptions);
             return ret;
         }
 
@@ -36,7 +37,8 @@ namespace FFMpegUI.Services.Middlewares
             var response = await httpClient.GetAsync(new Uri(uriString, UriKind.Relative));
             response.EnsureSuccessStatusCode();
 
-            var ret = await JsonSerializer.DeserializeAsync<ODataQFileServerDTO>(await response.Content.ReadAsStreamAsync());
+            var ret = await JsonSerializer.DeserializeAsync<ODataQFileServerDTO>(await response.Content.ReadAsStreamAsync(),
+                jsonSerializerOptions);
 
             return ret;
         }
@@ -114,7 +116,5 @@ namespace FFMpegUI.Services.Middlewares
 
             return ret;
         }
-
-      
     }
 }

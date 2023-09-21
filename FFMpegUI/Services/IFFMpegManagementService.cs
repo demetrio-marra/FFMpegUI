@@ -9,6 +9,7 @@ namespace FFMpegUI.Services
         Task<IPagedList<FFMpegProcessSummary>> GetProcessesSummary(int pageNumber, int pageSize);
 
         Task<FFMpegProcess> CreateProcess(FFMpegCreateProcessCommand command);
+        Task<FFMpegProcess> CreateProcess(FFMpegCreateProcessAltCommand command);
 
         Task<FFMpegProcess> GetProcessDetails(int processId);
 

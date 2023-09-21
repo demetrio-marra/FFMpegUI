@@ -23,8 +23,14 @@ namespace FFMpegUI.Mvc.Pages
         [BindProperty]
         public int? RescaleHorizontalWidth { get; set; }
 
+        [BindProperty]
+        public IEnumerable<long> QFileServerIds { get; set; }
+
         public SelectList AudioCodecList { get; set; }
         public SelectList VideoCodecList { get; set; }
+
+        public bool IsError { get; set; }
+        public string AlertMessage { get; set; }    
 
         public NuovoProcesso(ILogger<ProcessiModel> logger,
             IFFMpegManagementService service)
@@ -46,31 +52,29 @@ namespace FFMpegUI.Mvc.Pages
             RescaleHorizontalWidth = 1280;
         }
 
-        public async Task<IActionResult> OnPostAsync(IFormFileCollection files)
+        public async Task<IActionResult> OnPostAsync()
         {
-            if (files.Any())
+            if (!QFileServerIds.Any())
             {
-                var command = new FFMpegCreateProcessCommand();
-                var fileList = files.Select(f => new FFMpegCreateProcessCommand.FFMpegCreateProcessCommandItem
-                {
-                    UpcomingFileName = f.FileName,
-                    UpcomingStream = f.OpenReadStream()
-                }).ToList();
-
-                command.Files = fileList;
-
-                // Set the properties on the command
-                command.OverallConversionQuality = OverallConversionQuality;
-                command.AudioCodec = AudioCodec;
-                command.VideoCodec = VideoCodec;
-                command.RescaleHorizontalWidth = RescaleHorizontalWidth;
-
-                var process = await service.CreateProcess(command);
-
-                return RedirectToPage("/DettaglioProcesso", new { id = process.ProcessId });
+                IsError = true;
+                AlertMessage = "No files selected!";
+                return Page();
             }
 
-            return Page();
+            var command = new FFMpegCreateProcessAltCommand();
+            var fileList = QFileServerIds.Select(f => f).ToList();
+
+            command.QFileServerFileIds = fileList;
+
+            // Set the properties on the command
+            command.OverallConversionQuality = OverallConversionQuality;
+            command.AudioCodec = AudioCodec;
+            command.VideoCodec = VideoCodec;
+            command.RescaleHorizontalWidth = RescaleHorizontalWidth;
+
+            var process = await service.CreateProcess(command);
+
+            return RedirectToPage("/DettaglioProcesso", new { id = process.ProcessId });
         }
     }
 }

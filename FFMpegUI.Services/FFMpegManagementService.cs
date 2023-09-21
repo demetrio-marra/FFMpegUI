@@ -113,6 +113,73 @@ namespace FFMpegUI.Services
         }
 
 
+        async Task<FFMpegProcess> IFFMpegManagementService.CreateProcess(FFMpegCreateProcessAltCommand command)
+        {
+            var submissionDate = DateTime.Now;
+
+            var processItemsList = new List<FFMpegProcessItem>();
+
+            foreach (var f in command.QFileServerFileIds)
+            {
+                // upload each file to QFileServer and get its registered id
+                var uploadedFile = await qFileServerApiService.GetFileMetadata(f);
+
+                processItemsList.Add(new FFMpegProcessItem
+                {
+                    SourceFileName = uploadedFile.FileName,
+                    SourceFileId = uploadedFile.Id,
+                    SourceFileSize = uploadedFile.Size
+                });
+            }
+
+            var newProcess = new FFMpegProcess
+            {
+                SubmissionDate = submissionDate,
+                Items = processItemsList,
+                AudioCodec = command.AudioCodec,
+                OverallConversionQuality = command.OverallConversionQuality,
+                VideoCodec = command.VideoCodec,
+                RescaleHorizontalWidth = command.RescaleHorizontalWidth,
+                SourceFilesTotalSize = processItemsList.Sum(f => f.SourceFileSize)
+            };
+
+            var eProcess = mapper.Map<FFMpegPersistedProcess>(newProcess);
+            var eProcessItems = mapper.Map<IEnumerable<FFMpegPersistedProcessItem>>(newProcess.Items);
+            var eProcessFeatures = mapper.Map<FFMpegPersistedProcessFeatures>(newProcess);
+
+            var transactionId = await processRepository.BeginTransactionAsync();
+            try
+            {
+                var persistedProcess = await processRepository.CreateAsync(eProcess);
+                var persistedProcessId = persistedProcess.Id;
+                eProcessFeatures.ProcessId = persistedProcessId;
+
+                foreach (var eProcessItem in eProcessItems)
+                {
+                    eProcessItem.ProcessId = persistedProcessId;
+                }
+                var persistedProcessItems = await processItemsRepository.CreateAsync(eProcessItems);
+
+                await processFeaturesRepository.CreateAsync(eProcessFeatures);
+
+                eProcess.StartDate = DateTime.Now;
+                await processRepository.UpdateAsync(eProcess);
+
+                await processRepository.ConfirmTransactionAsync(transactionId);
+
+                taskQueue.Enqueue(persistedProcessId); // actually start the conversion process on a background longrunning task
+
+                var ret = await GetProcessAndItems(persistedProcessId);
+                return ret;
+            }
+            catch
+            {
+                await processRepository.RejectTransactionAsync(transactionId);
+                throw;
+            }
+        }
+
+
         async Task<FFMpegFileDownloadDTO> IFFMpegManagementService.GetFileForDownload(long fileId)
         {
             var x = await qFileServerApiService.DownloadFile(fileId);

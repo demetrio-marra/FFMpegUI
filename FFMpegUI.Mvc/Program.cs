@@ -155,11 +155,12 @@ namespace FFMpegUI.Mvc
 
             app.UseAuthorization();
 
-            app.MapRazorPages();
-
-            app.MapControllers();
-
-            app.MapHub<ReportProgressHub>("/reportprogresshub");
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapRazorPages();
+                endpoints.MapControllers();
+                endpoints.MapHub<ReportProgressHub>("/reportprogresshub");
+            });
 
             Task.Run(async () => {
                 using (var scope = app.Services.CreateScope())
