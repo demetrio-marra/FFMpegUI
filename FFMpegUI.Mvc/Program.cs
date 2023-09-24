@@ -112,7 +112,11 @@ namespace FFMpegUI.Mvc
 
             builder.Services.AddScoped<IFFMpegManagementService, FFMpegManagementService>();
 
-            builder.Services.AddRazorPages();
+            builder.Services.AddRazorPages(options =>
+            {
+                options.Conventions.AddPageRoute("/NuovoProcesso", "");
+            });
+
             builder.Services.AddControllers();
 
             builder.Services.AddSignalR(); // Add SignalR service

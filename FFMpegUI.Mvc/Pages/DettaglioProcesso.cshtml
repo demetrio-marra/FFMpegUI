@@ -4,7 +4,7 @@
 
 <h1>@ViewData["Title"]</h1>
 
-<div class="row mb-3">
+<div class="row mb-3 mt-4">
     <div class="col-md-6">
         <label asp-for="OverallConversionQuality" class="form-label">Overall Conversion Quality</label>
         <p class="form-control-static">@Model.OverallConversionQuality</p>
@@ -26,53 +26,57 @@
     </div>
 </div>
 
+<div class="row">
 
-<table class="table table-striped table-hover">
-    <thead>
-        <tr>
-            <th scope="col">Original</th>
-            <th scope="col">Size</th>
-            <th scope="col">Converted</th>
-            <th scope="col">Size</th>
-            <th scope="col">Start</th>
-            <th scope="col">End</th>
-            <th scope="col">State</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.ProcessItems)
-        {
-            <tr class="ff-dettaglio-row" data-id="@item.Id">
-                <td><a asp-page-handler="Download" asp-route-id="@item.SourceFileId">@item.SourceFileName</a></td>
-                <td>@(item.SourceFileSize.HasValue ? FileSystemHelper.FormatFileSize(item.SourceFileSize.Value) : "N/A")</td>
-                <td class="ff-dettaglio-cell-fileurl"><a asp-page-handler="Download" asp-route-id="@item.ConvertedFileId">@item.ConvertedFileName</a></td>
-                <td class="ff-dettaglio-cell-filesize">@(item.ConvertedFileSize.HasValue ? FileSystemHelper.FormatFileSize(item.ConvertedFileSize.Value) : "N/A")</td>
-                <td class="ff-dettaglio-cell-startdate">@(item.StartDate.HasValue ? item.StartDate.Value.ToString("g") : "N/A")</td>
-                <td class="ff-dettaglio-cell-enddate">@(item.EndDate.HasValue ? item.EndDate.Value.ToString("g") : "N/A")</td>
-                <td class="ff-dettaglio-cell-message">@item.StatusMessage</td>
-            </tr>
-        }
-    </tbody>
-    <tfoot>
-        <tr>
-            <td></td>
-            <td>@(Model.SourceFilesTotalSize.HasValue ? FileSystemHelper.FormatFileSize(Model.SourceFilesTotalSize.Value) : "N/A")</td>
-            <td></td>
-            <td class="ff-summary-cell-filesize">@(Model.ConvertedFilesTotalSize.HasValue ? FileSystemHelper.FormatFileSize(Model.ConvertedFilesTotalSize.Value) : "N/A")</td>
-            <td colspan="3"></td>
-        </tr>
-    </tfoot>
-</table>
+    <div class="col-md-12">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr>
+                    <th scope="col">Original</th>
+                    <th scope="col">Size</th>
+                    <th scope="col">Converted</th>
+                    <th scope="col">Size</th>
+                    <th scope="col">Start</th>
+                    <th scope="col">End</th>
+                    <th scope="col">State</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.ProcessItems)
+                {
+                    <tr class="ff-dettaglio-row" data-id="@item.Id">
+                        <td><a asp-page-handler="Download" asp-route-id="@item.SourceFileId">@item.SourceFileName</a></td>
+                        <td>@(item.SourceFileSize.HasValue ? FileSystemHelper.FormatFileSize(item.SourceFileSize.Value) : "N/A")</td>
+                        <td class="ff-dettaglio-cell-fileurl"><a asp-page-handler="Download" asp-route-id="@item.ConvertedFileId">@item.ConvertedFileName</a></td>
+                        <td class="ff-dettaglio-cell-filesize">@(item.ConvertedFileSize.HasValue ? FileSystemHelper.FormatFileSize(item.ConvertedFileSize.Value) : "N/A")</td>
+                        <td class="ff-dettaglio-cell-startdate">@(item.StartDate.HasValue ? item.StartDate.Value.ToString("g") : "N/A")</td>
+                        <td class="ff-dettaglio-cell-enddate">@(item.EndDate.HasValue ? item.EndDate.Value.ToString("g") : "N/A")</td>
+                        <td class="ff-dettaglio-cell-message">@item.StatusMessage</td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td></td>
+                    <td>@(Model.SourceFilesTotalSize.HasValue ? FileSystemHelper.FormatFileSize(Model.SourceFilesTotalSize.Value) : "N/A")</td>
+                    <td></td>
+                    <td class="ff-summary-cell-filesize">@(Model.ConvertedFilesTotalSize.HasValue ? FileSystemHelper.FormatFileSize(Model.ConvertedFilesTotalSize.Value) : "N/A")</td>
+                    <td colspan="3"></td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
 
+</div>
 
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.11/signalr.min.js"></script>
 
     <script>
-    
+
         const connection = new signalR.HubConnectionBuilder()
-        .withUrl("/reportprogresshub")
-        .build();
+            .withUrl("/reportprogresshub")
+            .build();
 
         connection.on("OnProcessItemMessage", (message) => {
 
@@ -108,12 +112,12 @@
         });
 
         connection.start()
-        .then(() => {
-            console.log("Connected to ProgressHub");
-        })
-        .catch(error => {
-            console.error("Error connecting to ProgressHub:", error);
-        });
+            .then(() => {
+                console.log("Connected to ProgressHub");
+            })
+            .catch(error => {
+                console.error("Error connecting to ProgressHub:", error);
+            });
 
     </script>
 
