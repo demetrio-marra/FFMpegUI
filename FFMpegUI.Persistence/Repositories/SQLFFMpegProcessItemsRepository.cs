@@ -11,7 +11,9 @@ namespace FFMpegUI.Persistence.Repositories
         private readonly IAsyncPolicy sqlPolicy;
 
 
-        public SQLFFMpegProcessItemsRepository(FFMpegDbContext dbContext, IResilientPoliciesLocator policiesLocator) : base(dbContext, policiesLocator) 
+        public SQLFFMpegProcessItemsRepository(FFMpegDbContext dbContext, 
+            IResilientPoliciesLocator policiesLocator,
+            FFMpegUITransactionsTracker transactionsTracker) : base(dbContext, policiesLocator, transactionsTracker) 
         {
             this.dbContext = dbContext;
             sqlPolicy = policiesLocator.GetPolicy(ResilientPolicyType.SqlDatabase);

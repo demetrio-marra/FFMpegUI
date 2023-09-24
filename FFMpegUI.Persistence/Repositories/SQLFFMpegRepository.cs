@@ -1,7 +1,6 @@
 ﻿using FFMpegUI.Persistence.Definitions.Repositories;
 using FFMpegUI.Resilience;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
 using PagedList.Core;
 using Polly;
 
@@ -9,70 +8,62 @@ namespace FFMpegUI.Persistence.Repositories
 {
     public class SQLFFMpegRepository<TEntity> : IFFMpegRepository where TEntity : class
     {
-        private readonly IDictionary<string, IDbContextTransaction> transactions;
         private readonly FFMpegDbContext dbContext;
         private readonly IAsyncPolicy sqlPolicy;
+        private readonly FFMpegUITransactionsTracker transactionsTracker;
 
-        public SQLFFMpegRepository(FFMpegDbContext dbContext, IResilientPoliciesLocator policiesLocator)
+
+        public SQLFFMpegRepository(FFMpegDbContext dbContext, IResilientPoliciesLocator policiesLocator, FFMpegUITransactionsTracker transactionsTracker)
         {
-            transactions = new Dictionary<string, IDbContextTransaction>();
             this.dbContext = dbContext;
             sqlPolicy = policiesLocator.GetPolicy(ResilientPolicyType.SqlDatabase);
+            this.transactionsTracker = transactionsTracker;
         }
+
 
         async Task IFFMpegRepository.ConfirmTransactionAsync(string transactionId)
         {
-            if (!transactions.TryGetValue(transactionId, out var tran))
+            var tran = await transactionsTracker.GetAndRemoveTransaction(transactionId);
+            if (tran == null)
             {
                 throw new Exception($"Invalid transaction id: {transactionId}");
             }
 
-            try
+            await sqlPolicy.ExecuteAsync(async () =>
             {
-                await sqlPolicy.ExecuteAsync(async () =>
-                {
-                    await tran.CommitAsync();
-                    await tran.DisposeAsync();
-                });
-            }
-            finally
-            {
-                transactions.Remove(transactionId);
-            }
+                await tran.CommitAsync();
+                await tran.DisposeAsync();
+            });
         }
+
 
         async Task<string> IFFMpegRepository.BeginTransactionAsync()
         {
-            var tranid = Guid.NewGuid().ToString();
-
-            await sqlPolicy.ExecuteAsync(async () =>
+            var tran = await sqlPolicy.ExecuteAsync(async () =>
             {
                 var tran = await dbContext.Database.BeginTransactionAsync();
-                transactions.Add(tranid, tran);
+                return tran;
             });
+
+            var tranid = await transactionsTracker.AddTransaction(tran);
 
             return tranid;
         }
 
+
         async Task IFFMpegRepository.RejectTransactionAsync(string transactionId)
         {
-            if (!transactions.TryGetValue(transactionId, out var tran))
+            var tran = await transactionsTracker.GetAndRemoveTransaction(transactionId);
+            if (tran == null)
             {
                 throw new Exception($"Invalid transaction id: {transactionId}");
             }
 
-            try
+            await sqlPolicy.ExecuteAsync(async () =>
             {
-                await sqlPolicy.ExecuteAsync(async () =>
-                {
-                    await tran.RollbackAsync();
-                    await tran.DisposeAsync();
-                });
-            }
-            finally
-            {
-                transactions.Remove(transactionId);
-            }
+                await tran.RollbackAsync();
+                await tran.DisposeAsync();
+            });
         }
 
 
@@ -86,6 +77,7 @@ namespace FFMpegUI.Persistence.Repositories
 
             return entity;
         }
+
 
         public virtual async Task DeleteAsync(int id)
         {
@@ -101,6 +93,7 @@ namespace FFMpegUI.Persistence.Repositories
                 await dbContext.SaveChangesAsync();
             });
         }
+
 
         public virtual async Task<IPagedList<TEntity>> GetAllAsync(int pageNumber, int pageSize)
         {
@@ -119,6 +112,7 @@ namespace FFMpegUI.Persistence.Repositories
             return await Task.FromResult(ret);
         }
 
+
         public virtual async Task<TEntity> GetAsync(int id)
         {
             var ret = await sqlPolicy.ExecuteAsync(async () =>
@@ -132,6 +126,7 @@ namespace FFMpegUI.Persistence.Repositories
 
             return ret;
         }
+
 
         public virtual async Task<TEntity> UpdateAsync(TEntity entity)
         {

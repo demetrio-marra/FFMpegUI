@@ -17,7 +17,8 @@ namespace FFMpegUI.Persistence.Repositories
 
 
         public SQLFFMpegProcessRepository(FFMpegDbContext dbContext,
-            IMapper mapper, IResilientPoliciesLocator policiesLocator) : base(dbContext, policiesLocator)
+            IMapper mapper, IResilientPoliciesLocator policiesLocator,
+            FFMpegUITransactionsTracker transactionsTracker) : base(dbContext, policiesLocator, transactionsTracker)
         {
             this.dbContext = dbContext;
             this.mapper = mapper;

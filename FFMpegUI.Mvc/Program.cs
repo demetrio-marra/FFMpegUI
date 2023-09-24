@@ -65,6 +65,8 @@ namespace FFMpegUI.Mvc
                 typeof(FFMpegPersistenceMapperProfile).Assembly
             );
 
+            builder.Services.AddSingleton<FFMpegUITransactionsTracker>();
+
             builder.Services.AddScoped<IFFMpegProcessFeaturesRepository, RavenFFMpegProcessFeaturesRepository>();
             builder.Services.AddScoped<IFFMpegProcessRepository, SQLFFMpegProcessRepository>();
             builder.Services.AddScoped<IFFMpegProcessItemsRepository, SQLFFMpegProcessItemsRepository>();
