@@ -31,6 +31,7 @@ namespace FFMpegUI.Persistence.Repositories
             using (var session = documentStore.OpenSession())
             {
                 var product = session.Query<FFMpegPersistedProcessFeatures>()
+                    .Customize(x => x.WaitForNonStaleResults(TimeSpan.FromSeconds(10)))
                     .Where(p => p.ProcessId == processFeatureId)
                     .Single();
                 session.Delete(product);
@@ -44,6 +45,7 @@ namespace FFMpegUI.Persistence.Repositories
             using var session = documentStore.OpenSession();
             // Use the session to query or store data
             var results = session.Query<FFMpegPersistedProcessFeatures>()
+                .Customize(x => x.WaitForNonStaleResults(TimeSpan.FromSeconds(10)))
                 .Where(p => p.ProcessId == processFeatureId)
                 .Single();
 
