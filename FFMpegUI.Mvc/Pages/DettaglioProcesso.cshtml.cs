@@ -46,8 +46,9 @@ namespace FFMpegUI.Mvc.Pages
             SourceFilesTotalSize = process.SourceFilesTotalSize;
             ConvertedFilesTotalSize = process.ConvertedFilesTotalSize;
 
-            ViewData["Title"] = $"Processo {id} detail";
+            ViewData["Title"] = $"Process {id} detail";
         }
+
 
         public async Task<IActionResult> OnGetDownload(long id)
         {

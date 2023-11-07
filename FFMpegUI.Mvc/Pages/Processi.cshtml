@@ -29,7 +29,7 @@
                 @foreach (var item in Model.Processes)
                 {
                 <tr class="ff-processo-row" data-id="@item.ProcessId">
-                    <td><a asp-page="/DettaglioProcesso" asp-route-id="@item.ProcessId">Dettagli</a></td>
+                    <td><a asp-page="/DettaglioProcesso" asp-route-id="@item.ProcessId">Details</a></td>
                     <td>@(item.ProcessId.HasValue ? item.ProcessId.Value.ToString() : "N/A")</td>
                     <td>@item.SubmissionDate.ToString("g")</td>
                     <td class="ff-processo-cell-startdate">@(item.StartDate.HasValue ? item.StartDate.Value.ToString("g") : "N/A")</td>
