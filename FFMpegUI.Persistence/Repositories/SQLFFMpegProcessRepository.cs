@@ -33,7 +33,7 @@ namespace FFMpegUI.Persistence.Repositories
             var ret = await sqlPolicy.ExecuteAsync(async () =>
             {
                 var res = dbContext.Processes
-                .OrderBy(a => EF.Property<int>(a, "Id"))
+                .OrderByDescending(a => a.SubmissionDate)
                 .AsNoTracking()
                 .ProjectTo<FFMpegProcessSummary>(mapper.ConfigurationProvider)
                 .ToPagedList(pageNumber, pageSize);
