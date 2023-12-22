@@ -18,7 +18,8 @@ namespace FFMpegUI.Mvc.Infrastructure
                 .ForMember(dest => dest.ProcessId, opt => opt.MapFrom(src => src.Id))
                 .ForMember(dest => dest.FilesCount, opt => opt.MapFrom(src => src.Items.Count()))
                 .ForMember(dest => dest.TotalFilesSize, opt => opt.MapFrom(src => (src.SourceFilesTotalSize ?? 0) + (src.ConvertedFilesTotalSize ?? 0)))
-                .ForMember(dest => dest.StatusMessage, opt => opt.MapFrom(src => src.StatusMessage));
+                .ForMember(dest => dest.StatusMessage, opt => opt.MapFrom(src => src.StatusMessage))
+                .ForMember(dest => dest.HideDelete, opt => opt.MapFrom(src => !src.EndDate.HasValue));
 
             CreateMap<FFMpegProcessItemStatusNotification, ProcessItemProgressViewModel>()
                 .ForMember(dest => dest.ProgressMessage, opt => opt.MapFrom(src => src.ProgressMessage))

@@ -18,5 +18,6 @@ namespace FFMpegUI.Services
         Task PerformProcessConversion(int processId);
 
         Task ElaborateProcessItemProgressMessage(FFMpegProcessItemMessage message);
+        Task DeleteProcess(int processId);
     }
 }

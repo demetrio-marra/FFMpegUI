@@ -1,6 +1,8 @@
 ﻿using FFMpegUI.Messages;
 using FFMpegUI.Models;
 using FFMpegUI.Services.Middlewares;
+using Microsoft.Extensions.Logging;
+using Sparrow.Logging;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 
@@ -8,6 +10,8 @@ namespace FFMpegUI.Services
 {
     public class FFMpegConversionService : IFFMpegConvertingService
     {
+        private readonly ILogger<FFMpegConversionService> logger;
+
         private static readonly Regex ffmpegTimeRegex = new Regex(@"time=(\d{2}:\d{2}:\d{2}\.\d{2})", RegexOptions.Compiled);
 
         private readonly IQFileServerApiService fileServerApiService;
@@ -15,10 +19,12 @@ namespace FFMpegUI.Services
 
 
         public FFMpegConversionService(IQFileServerApiService fileServerApiService,
-            IProgressMessagesDispatcher progressMessagesDispatcher)
+            IProgressMessagesDispatcher progressMessagesDispatcher,
+            ILogger<FFMpegConversionService> logger)
         {
             this.fileServerApiService = fileServerApiService;
             this.progressMessagesDispatcher = progressMessagesDispatcher;
+            this.logger = logger;
         }
 
 
@@ -159,15 +165,21 @@ namespace FFMpegUI.Services
             ffmpeg.StartInfo = new ProcessStartInfo
             {
                 FileName = "ffmpeg",
-                Arguments = $"-i {fileFullPath}",
+                Arguments = $"-i \"{fileFullPath}\"",
                 RedirectStandardError = true,
                 UseShellExecute = false,
                 CreateNoWindow = true,
             };
 
             ffmpeg.Start();
+            
+            var commandLine = ffmpeg.StartInfo.FileName + " " + ffmpeg.StartInfo.Arguments;
+            logger.LogDebug("GetVideoDuration - FFMpeg command: '{ffmpegCommand}'", commandLine);
 
             string output = ffmpeg.StandardError.ReadToEnd();
+
+            logger.LogDebug("GetVideoDuration - Output from ffmpeg: '{ffmpegOutput}'", output);
+
             var regex = new Regex(@"Duration: (\d{2}):(\d{2}):(\d{2})");
             var match = regex.Match(output);
 

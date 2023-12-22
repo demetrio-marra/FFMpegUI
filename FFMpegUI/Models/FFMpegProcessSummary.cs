@@ -9,5 +9,6 @@
         public int FilesCount { get; set; }
         public long TotalFilesSize { get; set; }
         public string? StatusMessage { get; set; }
+        public bool HideDelete { get; set; }
     }
 }

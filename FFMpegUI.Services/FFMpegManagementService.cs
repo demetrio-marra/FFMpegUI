@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.Configuration.Annotations;
 using FFMpegUI.Infrastructure.Services;
 using FFMpegUI.Infrastructure.Support;
 using FFMpegUI.Messages;
@@ -400,6 +401,27 @@ namespace FFMpegUI.Services
             var entity = await processRepository.GetAsync(processId);
             var ret = mapper.Map<FFMpegProcess>(entity);
             return ret;
+        }
+
+        async Task IFFMpegManagementService.DeleteProcess(int processId)
+        {
+            var processEntity = await processRepository.GetWithItemsAsync(processId);
+            if (processEntity == null)
+            {
+                return;
+            }
+
+            var filesToDeleteIds = processEntity.Items.Where(pe => pe.SourceFileId.HasValue).Select(pe => pe.SourceFileId.Value).ToList();
+
+            filesToDeleteIds = filesToDeleteIds.Concat(processEntity.Items.Where(pe => pe.ConvertedFileId.HasValue).Select(pe => pe.ConvertedFileId.Value).ToList()).ToList();
+
+            foreach(var ftd in filesToDeleteIds)
+            {
+                await qFileServerApiService.DeleteFile(ftd);
+                logger.LogInformation("Deleted file on QFileServer {qfsFileId}", ftd);
+            }
+
+            await processRepository.DeleteAsync(processId);
         }
     }
 }

@@ -30,5 +30,13 @@ namespace FFMpegUI.Mvc.Pages
             Processes = processi;
             return Page();
         }
+
+        public async Task<IActionResult> OnPostDelete(int id)
+        {
+            await service.DeleteProcess(id);
+            var processi = await service.GetProcessesSummary(PageNumber ?? 1, 10);
+            Processes = processi;
+            return Page();
+        }
     }
 }
